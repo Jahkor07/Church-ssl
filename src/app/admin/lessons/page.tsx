@@ -114,7 +114,12 @@ export default function AdminLessonsPage() {
             Manage your church lessons and educational content
           </p>
         </div>
-        {/* Upload button removed as per requirements - only show on upload page */}
+        <Button asChild>
+          <Link href="/admin/lessons/upload">
+            <Plus className="w-4 h-4 mr-2" />
+            Upload New Lesson
+          </Link>
+        </Button>
       </div>
 
       {/* Search and Filters */}
@@ -273,7 +278,12 @@ export default function AdminLessonsPage() {
           <p className="text-gray-600 mb-4">
             Try adjusting your search terms or filters
           </p>
-          {/* Upload button removed as per requirements - only show on upload page */}
+          <Button asChild>
+            <Link href="/admin/lessons/upload">
+              <Plus className="w-4 h-4 mr-2" />
+              Upload New Lesson
+            </Link>
+          </Button>
         </div>
       )}
 

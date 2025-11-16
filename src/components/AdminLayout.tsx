@@ -15,8 +15,7 @@ import {
   LogOut,
   User,
   Moon,
-  Sun,
-  ChevronDown
+  Sun
 } from 'lucide-react'
 import ProtectedRoute from '@/components/ProtectedRoute'
 
@@ -34,7 +33,6 @@ interface AdminLayoutProps {
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [darkMode, setDarkMode] = useState(false)
-  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
   
@@ -172,10 +170,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </div>
 
         {/* Main content */}
-        <div className="relative z-10 lg:pl-64 min-h-screen flex">
+        <div className="relative z-10 lg:pl-64">
           {/* Header - only show if not on login page */}
           {!isLoginPage && (
-            <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 w-full">
+            <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
               <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center">
                   <button
@@ -195,15 +193,15 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             </header>
           )}
 
-          {/* Main content area - adjusted for full screen and image panel */}
-          <main className={`flex-1 transition-all duration-300`}>
-            <div className="py-6 h-full">
-              <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-full">
+          {/* Main content area */}
+          <main className="flex-1">
+            <div className="py-6">
+              <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 {/* Wrap main content with fallback image */}
-                <div className="main-content h-full">
+                <div className="main-content">
                   {/* Show placeholder image only on the base admin path */}
                   {pathname === '/admin' || pathname === '/admin/' ? (
-                    <div className="empty-state h-full">
+                    <div className="empty-state">
                       <img 
                         src="/images/placeholder.png" 
                         alt="Select an option from the sidebar" 

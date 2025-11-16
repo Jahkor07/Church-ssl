@@ -112,7 +112,7 @@ export default function UploadLessonPage() {
   }
 
   return (
-    <div className="w-full px-4 md:px-6 lg:px-8 py-6">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center mb-6">
@@ -131,7 +131,7 @@ export default function UploadLessonPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 xl:gap-8">
         {/* Form */}
         <div className="lg:col-span-2">
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
@@ -143,8 +143,7 @@ export default function UploadLessonPage() {
                 </h2>
                 
                 <div className="grid grid-cols-1 gap-6">
-                  {/* Title - Full width */}
-                  <div className="col-span-1 lg:col-span-2">
+                  <div>
                     <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
                       Title *
                     </label>
@@ -160,8 +159,7 @@ export default function UploadLessonPage() {
                     />
                   </div>
 
-                  {/* Description - Full width */}
-                  <div className="col-span-1 lg:col-span-2">
+                  <div>
                     <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
                       Description *
                     </label>
@@ -177,7 +175,6 @@ export default function UploadLessonPage() {
                     />
                   </div>
 
-                  {/* Scripture Reference and Lesson Date */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label htmlFor="scriptureReference" className="block text-sm font-medium text-gray-700 mb-2">
@@ -210,8 +207,7 @@ export default function UploadLessonPage() {
                     </div>
                   </div>
 
-                  {/* Category - Full width */}
-                  <div className="col-span-1 lg:col-span-2">
+                  <div>
                     <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
                       Category
                     </label>

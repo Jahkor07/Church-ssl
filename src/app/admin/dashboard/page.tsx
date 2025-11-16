@@ -103,7 +103,12 @@ export default function AdminDashboard() {
             Manage your church lessons and educational content
           </p>
         </div>
-        {/* Upload button removed as per requirements - only show on upload page */}
+        <Button asChild>
+          <Link href="/admin/lessons/upload">
+            <Plus className="w-4 h-4 mr-2" />
+            Upload New Lesson
+          </Link>
+        </Button>
       </div>
 
       {/* Stats Cards */}
