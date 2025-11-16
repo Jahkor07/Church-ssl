@@ -390,7 +390,7 @@ export default function LessonForm({ initialData, isEditing = false }: LessonFor
               <select
                 value={dailySection.day}
                 onChange={(e) => handleDailySectionChange('day', e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                className="w-full px-3 py-2 sm:px-4 sm:py-2 border border-gray-300 rounded-lg"
               >
                 {days.map(day => (
                   <option key={day} value={day}>{day}</option>
@@ -404,7 +404,7 @@ export default function LessonForm({ initialData, isEditing = false }: LessonFor
                 value={dailySection.content}
                 onChange={(e) => handleDailySectionChange('content', e.target.value)}
                 rows={4}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                className="w-full px-3 py-2 sm:px-4 sm:py-2 border border-gray-300 rounded-lg"
                 placeholder="Enter the daily study content..."
               />
             </div>
@@ -415,7 +415,7 @@ export default function LessonForm({ initialData, isEditing = false }: LessonFor
                 type="text"
                 value={dailySection.bibleTexts}
                 onChange={(e) => handleDailySectionChange('bibleTexts', e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                className="w-full px-3 py-2 sm:px-4 sm:py-2 border border-gray-300 rounded-lg"
                 placeholder="Joshua 7:16-19"
               />
             </div>
@@ -423,9 +423,9 @@ export default function LessonForm({ initialData, isEditing = false }: LessonFor
             <button
               type="button"
               onClick={addDailySection}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+              className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
             >
-              <Plus size={20} /> Add Section
+              <Plus size={18} /> Add Section
             </button>
           </div>
           
@@ -438,7 +438,7 @@ export default function LessonForm({ initialData, isEditing = false }: LessonFor
 
               <div className="space-y-3">
                 {lesson.dailySections.map((section, index) => (
-                  <div key={index} className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                  <div key={index} className="bg-gray-50 border border-gray-200 rounded-lg p-3 sm:p-4">
                     <div className="flex justify-between items-start mb-2">
                       <div>
                         <span className="font-semibold text-indigo-600">{section.day}</span>
@@ -450,7 +450,7 @@ export default function LessonForm({ initialData, isEditing = false }: LessonFor
                         onClick={() => removeDailySection(index)}
                         className="text-red-600 hover:text-red-800"
                       >
-                        <Trash2 size={18} />
+                        <Trash2 size={16} />
                       </button>
                     </div>
 

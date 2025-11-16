@@ -112,7 +112,7 @@ export default function UploadLessonPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center mb-6">
@@ -124,18 +124,18 @@ export default function UploadLessonPage() {
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back
           </Button>
-          <h1 className="text-3xl font-bold text-gray-900">Upload New Lesson</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Upload New Lesson</h1>
         </div>
         <p className="text-gray-600">
           Create a new lesson with rich content and multimedia support
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 xl:gap-8">
         {/* Form */}
         <div className="lg:col-span-2">
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+            <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-6">
               {/* Basic Information */}
               <div className="space-y-6">
                 <h2 className="text-xl font-semibold text-gray-900 border-b border-gray-200 pb-2">
@@ -154,7 +154,7 @@ export default function UploadLessonPage() {
                       required
                       value={formData.title}
                       onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 sm:px-4 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       placeholder="Enter lesson title"
                     />
                   </div>
@@ -170,7 +170,7 @@ export default function UploadLessonPage() {
                       value={formData.description}
                       onChange={handleChange}
                       rows={4}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 sm:px-4 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       placeholder="Enter lesson description"
                     />
                   </div>
@@ -187,7 +187,7 @@ export default function UploadLessonPage() {
                         required
                         value={formData.scriptureReference}
                         onChange={handleChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-2 sm:px-4 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         placeholder="e.g., John 3:16-21"
                       />
                     </div>
@@ -202,7 +202,7 @@ export default function UploadLessonPage() {
                         name="lessonDate"
                         value={formData.lessonDate}
                         onChange={handleChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-2 sm:px-4 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
                   </div>
@@ -216,7 +216,7 @@ export default function UploadLessonPage() {
                       name="category"
                       value={formData.category}
                       onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 sm:px-4 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
                       <option value="Sunday">Sunday School</option>
                       <option value="Midweek">Midweek Service</option>
@@ -241,7 +241,7 @@ export default function UploadLessonPage() {
                     <select
                       value={dailySection.day}
                       onChange={(e) => handleDailySectionChange('day', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      className="w-full px-3 py-2 sm:px-4 sm:py-2 border border-gray-300 rounded-lg"
                     >
                       {days.map(day => (
                         <option key={day} value={day}>{day}</option>
@@ -255,7 +255,7 @@ export default function UploadLessonPage() {
                       value={dailySection.content}
                       onChange={(e) => handleDailySectionChange('content', e.target.value)}
                       rows={4}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      className="w-full px-3 py-2 sm:px-4 sm:py-2 border border-gray-300 rounded-lg"
                       placeholder="Enter the daily study content..."
                     />
                   </div>
@@ -266,7 +266,7 @@ export default function UploadLessonPage() {
                       type="text"
                       value={dailySection.bibleTexts}
                       onChange={(e) => handleDailySectionChange('bibleTexts', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      className="w-full px-3 py-2 sm:px-4 sm:py-2 border border-gray-300 rounded-lg"
                       placeholder="Joshua 7:16-19"
                     />
                   </div>
@@ -274,9 +274,9 @@ export default function UploadLessonPage() {
                   <button
                     type="button"
                     onClick={addDailySection}
-                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                    className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
                   >
-                    <Plus size={20} /> Add Section
+                    <Plus size={18} /> Add Section
                   </button>
                 </div>
                 
@@ -289,7 +289,7 @@ export default function UploadLessonPage() {
 
                     <div className="space-y-3">
                       {lesson.dailySections.map((section, index) => (
-                        <div key={index} className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                        <div key={index} className="bg-gray-50 border border-gray-200 rounded-lg p-3 sm:p-4">
                           <div className="flex justify-between items-start mb-2">
                             <div>
                               <span className="font-semibold text-indigo-600">{section.day}</span>
@@ -301,7 +301,7 @@ export default function UploadLessonPage() {
                               onClick={() => removeDailySection(index)}
                               className="text-red-600 hover:text-red-800"
                             >
-                              <Trash2 size={18} />
+                              <Trash2 size={16} />
                             </button>
                           </div>
 
@@ -326,13 +326,13 @@ export default function UploadLessonPage() {
                     Upload PDF or Image
                   </label>
                   <div className="flex items-center justify-center w-full">
-                    <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
-                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                        <UploadIcon className="w-8 h-8 mb-4 text-gray-500" />
-                        <p className="mb-2 text-sm text-gray-500">
+                    <label className="flex flex-col items-center justify-center w-full h-40 sm:h-48 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                      <div className="flex flex-col items-center justify-center pt-4 sm:pt-5 pb-4 sm:pb-6">
+                        <UploadIcon className="w-6 h-6 sm:w-8 sm:h-8 mb-3 sm:mb-4 text-gray-500" />
+                        <p className="mb-1 sm:mb-2 text-sm text-gray-500">
                           <span className="font-semibold">Click to upload</span> or drag and drop
                         </p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-gray-500 px-2 text-center">
                           PDF, PNG, JPG, GIF (MAX. 10MB)
                         </p>
                       </div>
@@ -354,7 +354,7 @@ export default function UploadLessonPage() {
                       <img 
                         src={previewUrl} 
                         alt="Preview" 
-                        className="max-h-40 rounded-lg border border-gray-200"
+                        className="max-h-32 sm:max-h-40 rounded-lg border border-gray-200 w-full object-contain"
                       />
                     </div>
                   )}
@@ -362,12 +362,13 @@ export default function UploadLessonPage() {
               </div>
 
               {/* Form Actions */}
-              <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+              <div className="flex flex-col sm:flex-row items-center justify-end space-y-3 sm:space-y-0 sm:space-x-4 pt-6 border-t border-gray-200">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={handleCancel}
                   disabled={isSubmitting}
+                  className="w-full sm:w-auto"
                 >
                   <X className="w-4 h-4 mr-2" />
                   Cancel
@@ -375,7 +376,7 @@ export default function UploadLessonPage() {
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="bg-blue-600 hover:bg-blue-700"
+                  className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
                 >
                   {isSubmitting ? (
                     <>
@@ -395,7 +396,7 @@ export default function UploadLessonPage() {
         </div>
 
         {/* Preview Panel */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 sm:p-6">
           <h2 className="text-xl font-semibold text-gray-900 border-b border-gray-200 pb-2 mb-4">
             Preview
           </h2>
