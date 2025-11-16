@@ -54,3 +54,25 @@
     font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
   }
 }
+
+/* Empty state and placeholder image styles */
+.empty-state {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.placeholder-image {
+  width: 60%;
+  max-width: 400px;
+  opacity: 0.6;
+}
+
+@media (max-width: 768px) {
+  .placeholder-image {
+    width: 90%;
+  }
+}

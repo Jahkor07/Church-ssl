@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { 
@@ -20,12 +20,22 @@ export default function AdminSettingsPage() {
   const [emailUpdates, setEmailUpdates] = useState(false)
   const router = useRouter()
 
+  // Load dark mode preference from localStorage on mount
+  useEffect(() => {
+    const savedDarkMode = localStorage.getItem('darkMode') === 'true'
+    setDarkMode(savedDarkMode)
+  }, [])
+
   const toggleDarkMode = () => {
-    setDarkMode(!darkMode)
+    const newDarkMode = !darkMode
+    setDarkMode(newDarkMode)
+    localStorage.setItem('darkMode', newDarkMode.toString())
     document.documentElement.classList.toggle('dark')
   }
 
   const handleLogout = () => {
+    // Remove auth token and redirect to home page
+    localStorage.removeItem('admin-auth-token')
     router.push('/')
   }
 

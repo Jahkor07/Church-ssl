@@ -12,17 +12,26 @@ export default function AdminLoginPage() {
     password: ''
   })
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
+    setError('')
     
     // Mock login - simulate API call
     setTimeout(() => {
-      console.log('Login attempt:', formData)
-      setIsLoading(false)
-      router.push('/admin/dashboard')
+      // Simple validation for demo purposes
+      if (formData.username === 'admin' && formData.password === 'password') {
+        // Set auth token in localStorage
+        localStorage.setItem('admin-auth-token', 'admin-demo-token')
+        // Redirect to dashboard
+        router.push('/admin/dashboard')
+      } else {
+        setError('Invalid username or password')
+        setIsLoading(false)
+      }
     }, 1000)
   }
 
@@ -50,27 +59,42 @@ export default function AdminLoginPage() {
         {/* Header */}
         <div className="text-center">
           <Link href="/" className="inline-block">
-            <div className="w-20 h-20 mx-auto bg-blue-600 rounded-2xl flex items-center justify-center mb-6 overflow-hidden shadow-xl">
+            <div className="w-24 h-24 mx-auto mb-6 overflow-hidden">
               <Image
                 src="/S.png"
                 alt="Church SSL Logo"
-                width={60}
-                height={60}
-                className="w-12 h-12 object-contain"
+                width={96}
+                height={96}
+                className="w-full h-full object-contain opacity-90"
               />
             </div>
           </Link>
-           <h2 className="text-3xl font-bold text-white">
-             Welcome Back
-           </h2>
-           <p className="mt-2 text-sm text-white/90">
-             Sign in to your admin account
-           </p>
+          <h2 className="text-3xl font-bold text-white">
+            Welcome Back
+          </h2>
+          <p className="mt-2 text-sm text-white/90">
+            Sign in to your admin account
+          </p>
         </div>
 
          {/* Login Form */}
          <div className="bg-white/20 dark:bg-gray-800/20 py-8 px-8 shadow-2xl rounded-2xl border border-white/30 dark:border-gray-700/30 backdrop-blur-md">
           <form className="space-y-6" onSubmit={handleSubmit}>
+            {error && (
+              <div className="rounded-md bg-red-50 p-4">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-red-800">{error}</h3>
+                  </div>
+                </div>
+              </div>
+            )}
+            
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-white">
                 Username
