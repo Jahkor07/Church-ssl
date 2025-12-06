@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import GlobalWrapper from '@/components/GlobalWrapper'
 import { 
   Home, 
   BookOpen, 
@@ -31,7 +32,23 @@ export default function DashboardLayout({
   const pathname = usePathname()
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    // Full screen container with flex centering similar to homepage
+    <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden bg-blue-50 dark:bg-gray-900">
+      {/* Background Image - using same classes as homepage with fallback */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: `url('/images/backgrounds/S3.jpg')`,
+          backgroundColor: '#3b82f6', // Fallback blue color
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}
+      ></div>
+      
+      {/* Background Overlay - using same approach as homepage but more transparent */}
+      <div className="absolute inset-0 bg-white/80 dark:bg-gray-900/80"></div>
+      
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div 
@@ -104,10 +121,10 @@ export default function DashboardLayout({
         </div>
       </div>
 
-      {/* Main content */}
-      <div className="lg:pl-64">
+      {/* Main content - using flex to center content similar to homepage */}
+      <div className="lg:pl-64 relative z-10 min-h-screen w-full flex items-center justify-center">
         {/* Header */}
-        <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+        <header className="bg-white/90 dark:bg-gray-800/90 shadow-sm border-b border-gray-200 dark:border-gray-700 absolute top-0 left-0 right-0 backdrop-blur-sm">
           <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
             <div className="flex items-center">
               <button
@@ -162,11 +179,12 @@ export default function DashboardLayout({
           </div>
         </header>
 
-        {/* Main content area */}
-        <main className="flex-1">
-          <div className="py-6">
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-              {children}
+        {/* Main content area - ensure it fills the screen and centers content */}
+        <main className="flex-1 w-full flex items-center justify-center pt-16">
+          <div className="py-6 w-full h-full flex items-center justify-center">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full h-full flex items-center justify-center">
+              {/* Apply global wrapper to all dashboard pages */}
+              <GlobalWrapper>{children}</GlobalWrapper>
             </div>
           </div>
         </main>
@@ -174,4 +192,3 @@ export default function DashboardLayout({
     </div>
   )
 }
-

@@ -141,13 +141,14 @@ export default function LessonForm({ initialData, isEditing = false }: LessonFor
   const onSubmit = async (data: LessonFormData) => {
     setLoading(true)
     try {
+      // Use Next.js API routes
       const url = isEditing ? `/api/lessons/${initialData?.id}` : '/api/lessons'
       const method = isEditing ? 'PUT' : 'POST'
 
       const response = await fetch(url, {
         method,
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({...data, dailySections: lesson.dailySections})
       })

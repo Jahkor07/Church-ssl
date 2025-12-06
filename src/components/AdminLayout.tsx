@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import GlobalWrapper from '@/components/GlobalWrapper'
 import { 
   LayoutDashboard, 
   BookOpen, 
@@ -65,16 +66,17 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen relative">
-        {/* Background Image */}
+      {/* Full screen container with flex centering similar to homepage */}
+      <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden">
+        {/* Background Image - using same classes as homepage */}
         <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat bg-fixed"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: `url('/images/backgrounds/admin-bg.jpg')`
+            backgroundImage: `url('/images/backgrounds/S3.jpg')`
           }}
         ></div>
         
-        {/* Background Overlay */}
+        {/* Background Overlay - using same approach as homepage */}
         <div className="absolute inset-0 bg-gray-50/95 dark:bg-gray-900/95"></div>
         
         {/* Mobile sidebar overlay */}
@@ -85,35 +87,35 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           />
         )}
 
-        {/* Sidebar */}
-        <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}>
-          <div className="flex h-full flex-col">
-            {/* Logo */}
-            <div className="flex h-16 items-center justify-between px-6 border-b border-gray-200 dark:border-gray-700">
-              <Link href="/admin/dashboard" className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center overflow-hidden shadow-lg">
-                  <Image
-                    src="/S.png"
-                    alt="Church SSL Logo"
-                    width={40}
-                    height={40}
-                    className="w-8 h-8 object-contain"
-                  />
-                </div>
-                <span className="text-xl font-bold text-gray-900 dark:text-white">Church SSL</span>
-              </Link>
-              <button
-                onClick={() => setSidebarOpen(false)}
-                className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+        {/* Sidebar - only render if not on login page */}
+        {!isLoginPage && (
+          <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+            sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}>
+            <div className="flex h-full flex-col">
+              {/* Logo */}
+              <div className="flex h-16 items-center justify-between px-6 border-b border-gray-200 dark:border-gray-700">
+                <Link href="/admin/dashboard" className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center overflow-hidden shadow-lg">
+                    <Image
+                      src="/S.png"
+                      alt="Church SSL Logo"
+                      width={40}
+                      height={40}
+                      className="w-8 h-8 object-contain"
+                    />
+                  </div>
+                  <span className="text-xl font-bold text-gray-900 dark:text-white">Church SSL</span>
+                </Link>
+                <button
+                  onClick={() => setSidebarOpen(false)}
+                  className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
 
-            {/* Navigation - only show if not on login page */}
-            {!isLoginPage && (
+              {/* Navigation */}
               <nav className="flex-1 px-4 py-6 space-y-2">
                 {navigation.map((item) => {
                   const isActive = pathname === item.href
@@ -134,10 +136,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   )
                 })}
               </nav>
-            )}
 
-            {/* User info and logout - only show if not on login page */}
-            {!isLoginPage && (
+              {/* User info and logout */}
               <div className="p-4 border-t border-gray-200 dark:border-gray-700">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-3">
@@ -165,15 +165,15 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   Logout
                 </Button>
               </div>
-            )}
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* Main content */}
-        <div className="relative z-10 lg:pl-64">
+        {/* Main content - using flex to center content similar to homepage */}
+        <div className={`relative z-10 ${!isLoginPage ? 'lg:pl-64' : ''} min-h-screen w-full flex items-center justify-center`}>
           {/* Header - only show if not on login page */}
           {!isLoginPage && (
-            <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+            <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 absolute top-0 left-0 right-0">
               <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center">
                   <button
@@ -189,19 +189,27 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                     </h1>
                   </div>
                 </div>
+                <div className="flex items-center space-x-4">
+                  <button
+                    onClick={toggleDarkMode}
+                    className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
+                  >
+                    {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                  </button>
+                </div>
               </div>
             </header>
           )}
 
-          {/* Main content area */}
-          <main className="flex-1">
-            <div className="py-6">
-              <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          {/* Main content area - ensure it fills the screen and centers content */}
+          <main className="flex-1 w-full flex items-center justify-center">
+            <div className="py-6 w-full h-full flex items-center justify-center">
+              <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full h-full flex items-center justify-center">
                 {/* Wrap main content with fallback image */}
-                <div className="main-content">
+                <div className="main-content w-full h-full flex items-center justify-center">
                   {/* Show placeholder image only on the base admin path */}
                   {pathname === '/admin' || pathname === '/admin/' ? (
-                    <div className="empty-state">
+                    <div className="empty-state w-full h-full flex items-center justify-center">
                       <img 
                         src="/images/placeholder.png" 
                         alt="Select an option from the sidebar" 
@@ -209,7 +217,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                       />
                     </div>
                   ) : (
-                    children
+                    // Apply global wrapper to all non-login pages
+                    isLoginPage ? children : <GlobalWrapper>{children}</GlobalWrapper>
                   )}
                 </div>
               </div>
