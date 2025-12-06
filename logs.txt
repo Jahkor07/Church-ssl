@@ -1,3 +1,9 @@
+A:\PC\Desktop\ssl-frontend\Church-ssl>npm run dev
+
+> church-ssl@0.1.0 dev
+> dev.bat
+
+
 > church-ssl@0.1.0 dev-server
 > next dev --turbopack
 
@@ -7,85 +13,28 @@
 
  ✓ Starting...
  ○ Compiling middleware ...
- ✓ Compiled middleware in 13.7s
- ✓ Ready in 73s
+ ✓ Compiled middleware in 7.3s
+ ✓ Ready in 32.2s
  ○ Compiling / ...
- ✓ Compiled in 44.1s
- ✓ Compiled / in 44.9s
- GET / 200 in 48332ms
+ ✓ Compiled / in 30.5s
+ GET / 200 in 32043ms
  ○ Compiling /favicon.ico ...
- ✓ Compiled /favicon.ico in 2.1s
- GET /favicon.ico?favicon.0b3bf435.ico 200 in 3263ms
+ ✓ Compiled /favicon.ico in 1354ms
+ GET /favicon.ico?favicon.0b3bf435.ico 200 in 1977ms
  ○ Compiling /admin/login ...
- ✓ Compiled /admin/login in 4.5s
- GET /admin/login 200 in 4923ms
+ ✓ Compiled /admin/login in 51.1s
+ GET /admin/login 200 in 5461ms
+ GET /admin/login 200 in 61926ms
  ○ Compiling /api/admin/login ...
- ✓ Compiled /api/admin/login in 3.5s
-Error: Route "/api/admin/login" used `cookies().set('admin-auth-token', ...)`. `cookies()` should be awaited before using its value. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-    at POST (src\app\api\admin\login\route.ts:39:15)
-  37 |
-  38 |     // Set the token in a secure, httpOnly cookie
-> 39 |     cookies().set('admin-auth-token', token, {
-     |               ^
-  40 |       httpOnly: true,
-  41 |       secure: process.env.NODE_ENV !== 'development',
-  42 |       path: '/',
- POST /api/admin/login 200 in 11370ms
+ ✓ Compiled /api/admin/login in 3.1s
+ POST /api/admin/login 200 in 4886ms
  ○ Compiling /admin/dashboard ...
- ✓ Compiled /admin/dashboard in 31.4s
- GET /admin/dashboard 200 in 32614ms
- GET /admin/login 200 in 1069ms
-Error: Route "/api/admin/login" used `cookies().set('admin-auth-token', ...)`. `cookies()` should be awaited before using its value. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-    at POST (src\app\api\admin\login\route.ts:39:15)
-  37 |
-  38 |     // Set the token in a secure, httpOnly cookie
-> 39 |     cookies().set('admin-auth-token', token, {
-     |               ^
-  40 |       httpOnly: true,
-  41 |       secure: process.env.NODE_ENV !== 'development',
-  42 |       path: '/',
- POST /api/admin/login 200 in 1196ms
- GET /admin/dashboard 200 in 499ms
- GET /admin/login 200 in 464ms
- GET / 200 in 772ms
- GET /admin/login 200 in 580ms
- ✓ Compiled middleware in 357ms
- ✓ Compiled in 13ms
-Error: Route "/api/admin/login" used `cookies().set('admin-auth-token', ...)`. `cookies()` should be awaited before using its value. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-    at POST (src\app\api\admin\login\route.ts:39:15)
-  37 |
-  38 |     // Set the token in a secure, httpOnly cookie
-> 39 |     cookies().set('admin-auth-token', token, {
-     |               ^
-  40 |       httpOnly: true,
-  41 |       secure: process.env.NODE_ENV !== 'development',
-  42 |       path: '/',
- POST /api/admin/login 200 in 2673ms
- GET /admin/dashboard 200 in 531ms
- GET /admin/login 200 in 575ms
- POST /api/admin/login 401 in 1754ms
-Error: Route "/api/admin/login" used `cookies().set('admin-auth-token', ...)`. `cookies()` should be awaited before using its value. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-    at POST (src\app\api\admin\login\route.ts:39:15)
-  37 |
-  38 |     // Set the token in a secure, httpOnly cookie
-> 39 |     cookies().set('admin-auth-token', token, {
-     |               ^
-  40 |       httpOnly: true,
-  41 |       secure: process.env.NODE_ENV !== 'development',
-  42 |       path: '/',
- POST /api/admin/login 200 in 1214ms
- GET /admin/dashboard 200 in 534ms
- GET /admin/login 200 in 455ms
- ✓ Compiled in 7.3s
-Error: Route "/api/admin/login" used `cookies().set('admin-auth-token', ...)`. `cookies()` should be awaited before using its value. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-    at POST (src\app\api\admin\login\route.ts:39:15)
-  37 |
-  38 |     // Set the token in a secure, httpOnly cookie
-> 39 |     cookies().set('admin-auth-token', token, {
-     |               ^
-  40 |       httpOnly: true,
-  41 |       secure: process.env.NODE_ENV !== 'development',
-  42 |       path: '/',
- POST /api/admin/login 200 in 1331ms
- GET /admin/dashboard 200 in 515ms
- GET /admin/login 200 in 1941ms
+ ✓ Compiled /admin/dashboard in 1338ms
+ GET /admin/dashboard 200 in 1506ms
+ GET /admin/login 200 in 332ms
+ POST /api/admin/login 200 in 629ms
+ GET /admin/dashboard 200 in 271ms
+ GET /admin/login 200 in 385ms
+ POST /api/admin/login 200 in 866ms
+ GET /admin/dashboard 200 in 323ms
+ GET /admin/login 200 in 301ms

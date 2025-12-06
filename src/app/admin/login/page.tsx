@@ -36,8 +36,10 @@ export default function AdminLoginPage() {
       const data = await response.json()
       
       if (response.ok) {
+        // Store auth token
+        localStorage.setItem('admin-auth-token', data.token)
         // Redirect to dashboard
-        router.replace('/admin/dashboard')
+        router.push('/admin/dashboard')
       } else {
         setError(data.error || 'Invalid username or password')
         setIsLoading(false)

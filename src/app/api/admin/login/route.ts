@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 
 // POST /api/admin/login - Admin login endpoint
 export async function POST(request: Request) {
@@ -35,18 +34,10 @@ export async function POST(request: Request) {
     const authData = await authResponse.json();
     const token = authData.jwt;
 
-    // Set the token in a secure, httpOnly cookie
-    (await cookies()).set('admin-auth-token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV !== 'development',
-      path: '/',
-      sameSite: 'strict',
-      maxAge: 60 * 60 * 24 * 7 // 1 week
-    });
-
-    // Return success response
+    // Return success response with token
     return NextResponse.json({
       message: 'Login successful',
+      token: token
     });
   } catch (error) {
     console.error('Login error:', error);
