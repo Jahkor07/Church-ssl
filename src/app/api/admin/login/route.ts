@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { cookies } from 'next/headers';
 
 // POST /api/admin/login - Admin login endpoint
 export async function POST(request: Request) {
@@ -15,26 +15,38 @@ export async function POST(request: Request) {
       );
     }
 
-    // For demo purposes, we'll accept the default admin/password combination
-    // In a production app, you would validate against the database
-    const isValidAdmin = username === 'admin' && password === 'password';
-    
-    if (!isValidAdmin) {
+    // Call the external authentication API
+    const authResponse = await fetch('http://localhost:9000/authenticate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ username, password }),
+    });
+
+    if (!authResponse.ok) {
+      const errorData = await authResponse.json();
       return NextResponse.json(
-        { error: 'Invalid credentials' },
-        { status: 401 }
+        { error: errorData.message || 'Invalid credentials' },
+        { status: authResponse.status }
       );
     }
 
-    // Return success response with token
+    const authData = await authResponse.json();
+    const token = authData.jwt;
+
+    // Set the token in a secure, httpOnly cookie
+    (await cookies()).set('admin-auth-token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV !== 'development',
+      path: '/',
+      sameSite: 'strict',
+      maxAge: 60 * 60 * 24 * 7 // 1 week
+    });
+
+    // Return success response
     return NextResponse.json({
       message: 'Login successful',
-      user: {
-        id: 1,
-        username: 'admin',
-        role: 'ADMIN'
-      },
-      token: 'admin-jwt-token-example' // In a real app, this would be a proper JWT
     });
   } catch (error) {
     console.error('Login error:', error);

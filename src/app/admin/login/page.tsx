@@ -36,10 +36,8 @@ export default function AdminLoginPage() {
       const data = await response.json()
       
       if (response.ok) {
-        // Store auth token
-        localStorage.setItem('admin-auth-token', data.token)
         // Redirect to dashboard
-        router.push('/admin/dashboard')
+        router.replace('/admin/dashboard')
       } else {
         setError(data.error || 'Invalid username or password')
         setIsLoading(false)
@@ -325,8 +323,8 @@ export default function AdminLoginPage() {
               Demo Credentials
             </h3>
             <p className="text-xs sm:text-sm text-blue-50">
-              Username: <code className="bg-blue-400/30 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded text-white">admin</code><br/>
-              Password: <code className="bg-blue-400/30 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded text-white">password</code>
+              Username: <code className="bg-blue-400/30 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded text-white">adminuser</code><br/>
+              Password: <code className="bg-blue-400/30 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded text-white">password456</code>
             </p>
           </div>
 
