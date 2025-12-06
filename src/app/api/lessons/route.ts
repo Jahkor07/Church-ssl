@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { title, description, content, introduction, year, quarter, keywords, languageId } = body;
+    const { title, description, content, introduction, year, quarter, keywords, languageId, dailySections } = body;
 
     // Validate required fields
     if (!title || !content || !year || !quarter || !languageId) {
@@ -38,10 +38,22 @@ export async function POST(req: NextRequest) {
           connect: {
             id: languageId
           }
-        }
+        },
+        // Create sections if provided
+        ...(dailySections && Array.isArray(dailySections) && {
+          sections: {
+            create: dailySections.map((section: any) => ({
+              day: section.day,
+              content: section.content,
+              bibleTexts: section.bibleTexts,
+              order: 0 // Default order
+            }))
+          }
+        })
       },
       include: {
-        language: true
+        language: true,
+        sections: true
       }
     });
 
@@ -58,7 +70,8 @@ export async function POST(req: NextRequest) {
       language: {
         languageId: lesson.languageId,
         languageName: lesson.language.name
-      }
+      },
+      sections: lesson.sections || []
     }, { status: 201 });
   } catch (error) {
     console.error('Error creating lesson:', error);
@@ -127,7 +140,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
     const { id } = params;
     const body = await req.json();
-    const { title, description, content, introduction, year, quarter, keywords, languageId, isPublished, order } = body;
+    const { title, description, content, introduction, year, quarter, keywords, languageId, isPublished, order, dailySections } = body;
 
     // Validate required fields
     if (!title || !content || !year || !quarter || !languageId) {
@@ -156,10 +169,23 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
           connect: {
             id: languageId
           }
-        }
+        },
+        // Handle sections if provided
+        ...(dailySections && Array.isArray(dailySections) && {
+          sections: {
+            deleteMany: {}, // Delete all existing sections
+            create: dailySections.map((section: any) => ({
+              day: section.day,
+              content: section.content,
+              bibleTexts: section.bibleTexts,
+              order: 0 // Default order
+            }))
+          }
+        })
       },
       include: {
-        language: true
+        language: true,
+        sections: true
       }
     });
 
@@ -178,7 +204,8 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         languageName: lesson.language.name
       },
       isPublished: lesson.isPublished,
-      order: lesson.order
+      order: lesson.order,
+      sections: lesson.sections || []
     });
   } catch (error) {
     console.error('Error updating lesson:', error);

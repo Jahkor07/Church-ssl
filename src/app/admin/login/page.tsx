@@ -20,19 +20,34 @@ export default function AdminLoginPage() {
     setIsLoading(true)
     setError('')
     
-    // Mock login - simulate API call
-    setTimeout(() => {
-      // Simple validation for demo purposes
-      if (formData.username === 'admin' && formData.password === 'password') {
-        // Set auth token in localStorage
-        localStorage.setItem('admin-auth-token', 'admin-demo-token')
+    try {
+      // Connect to Next.js backend on port 3000
+      const response = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: formData.username,
+          password: formData.password,
+        }),
+      })
+
+      const data = await response.json()
+      
+      if (response.ok) {
+        // Store auth token
+        localStorage.setItem('admin-auth-token', data.token)
         // Redirect to dashboard
         router.push('/admin/dashboard')
       } else {
-        setError('Invalid username or password')
+        setError(data.error || 'Invalid username or password')
         setIsLoading(false)
       }
-    }, 1000)
+    } catch (error) {
+      setError('Network error. Please try again.')
+      setIsLoading(false)
+    }
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,92 +58,224 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative">
-      {/* Background Image */}
+    <div className="fixed inset-0 w-screen h-screen overflow-hidden">
+      {/* Background Image - FULL PAGE COVERAGE */}
+      <style jsx global>{`
+        body {
+          margin: 0;
+          padding: 0;
+          overflow: hidden;
+        }
+        
+        @media (max-width: 640px) {
+          .responsive-container {
+            padding: 1rem;
+          }
+          
+          .responsive-text-large {
+            font-size: 1.5rem;
+          }
+          
+          .responsive-text-medium {
+            font-size: 1rem;
+          }
+          
+          .responsive-input {
+            padding: 0.75rem;
+          }
+          
+          .responsive-logo {
+            width: 5rem;
+            height: 5rem;
+          }
+        }
+        
+        @media (min-width: 641px) and (max-width: 1024px) {
+          .responsive-container {
+            padding: 1.5rem;
+          }
+          
+          .responsive-text-large {
+            font-size: 2rem;
+          }
+          
+          .responsive-text-medium {
+            font-size: 1.125rem;
+          }
+          
+          .responsive-input {
+            padding: 1rem;
+          }
+          
+          .responsive-logo {
+            width: 6rem;
+            height: 6rem;
+          }
+        }
+        
+        @media (min-width: 1025px) {
+          .responsive-container {
+            padding: 2rem;
+          }
+          
+          .responsive-text-large {
+            font-size: 2.25rem;
+          }
+          
+          .responsive-text-medium {
+            font-size: 1.25rem;
+          }
+          
+          .responsive-input {
+            padding: 1.125rem;
+          }
+          
+          .responsive-logo {
+            width: 6rem;
+            height: 6rem;
+          }
+        }
+        
+        /* Optimize transitions for performance */
+        .optimized-transition {
+          transition: all 0.2s ease-out;
+          will-change: transform;
+        }
+        
+        .optimized-transition-fast {
+          transition: all 0.15s ease-out;
+          will-change: transform;
+        }
+        
+        /* Optimize backdrop blur */
+        .optimized-backdrop {
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+        }
+        
+        /* Master fade and blend effect for logo */
+        .master-blend-logo {
+          opacity: 0.8;
+          filter: blur(0.5px) brightness(1.1);
+          mix-blend-mode: soft-light;
+          border-radius: 22px;
+          box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+        }
+      `}</style>
+      
       <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: `url('/images/backgrounds/S3.jpg')`
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          backgroundImage: `url('/images/backgrounds/S3.jpg')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center center',
+          backgroundRepeat: 'no-repeat',
+          backgroundAttachment: 'fixed',
+          zIndex: -2
         }}
       ></div>
       
-       {/* Background Overlay */}
-       <div className="absolute inset-0 bg-gradient-to-br from-blue-600/30 via-purple-600/30 to-indigo-800/30"></div>
+      {/* Solid color fallback */}
+      <div 
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          backgroundColor: '#4f46e5',
+          zIndex: -3
+        }}
+      ></div>
       
-      <div className="relative z-10 max-w-md w-full space-y-8">
-        {/* Header */}
-        <div className="text-center">
-          <Link href="/" className="inline-block">
-            <div className="w-24 h-24 mx-auto mb-6 overflow-hidden">
-              <Image
-                src="/S.png"
-                alt="Church SSL Logo"
-                width={96}
-                height={96}
-                className="w-full h-full object-contain opacity-90"
-              />
-            </div>
-          </Link>
-          <h2 className="text-3xl font-bold text-white">
-            Welcome Back
-          </h2>
-          <p className="mt-2 text-sm text-white/90">
-            Sign in to your admin account
-          </p>
-        </div>
+      {/* Background Overlay */}
+      <div 
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          background: 'linear-gradient(to bottom right, rgba(59, 130, 246, 0.3), rgba(139, 92, 246, 0.3), rgba(79, 70, 229, 0.3))',
+          zIndex: -1
+        }}
+      ></div>
+      
+      {/* Content Container with responsive padding */}
+      <div className="relative z-10 flex items-center justify-center w-full h-full responsive-container">
+        <div className="w-full max-w-md space-y-4 bg-white/10 dark:bg-gray-900/10 optimized-backdrop rounded-2xl border border-white/20 dark:border-gray-700/20 p-5 sm:p-6 shadow-2xl">
+          {/* Header with responsive text */}
+          <div className="text-center">
+            <Link href="/" className="inline-block">
+              <div className="mx-auto mb-3 sm:mb-4 overflow-hidden shadow-lg responsive-logo">
+                <Image
+                  src="/S.png"
+                  alt="Church SSL Logo"
+                  width={96}
+                  height={96}
+                  className="w-full h-full object-contain master-blend-logo"
+                />
+              </div>
+            </Link>
+            <h2 className="font-bold text-white mb-1 responsive-text-large">
+              Welcome Back
+            </h2>
+            <p className="text-white/80 responsive-text-medium">
+              Sign in to your admin account
+            </p>
+          </div>
 
-         {/* Login Form */}
-         <div className="bg-white/20 dark:bg-gray-800/20 py-8 px-8 shadow-2xl rounded-2xl border border-white/30 dark:border-gray-700/30 backdrop-blur-md">
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          {/* Login Form */}
+          <form className="space-y-4 sm:space-y-5" onSubmit={handleSubmit}>
             {error && (
-              <div className="rounded-md bg-red-50 p-4">
+              <div className="rounded-lg bg-red-500/20 border border-red-400/30 p-3 optimized-backdrop">
                 <div className="flex">
                   <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <svg className="h-4 w-4 sm:h-5 sm:w-5 text-red-200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                     </svg>
                   </div>
-                  <div className="ml-3">
-                    <h3 className="text-sm font-medium text-red-800">{error}</h3>
+                  <div className="ml-2 sm:ml-3">
+                    <h3 className="text-sm sm:text-base font-medium text-red-100">{error}</h3>
                   </div>
                 </div>
               </div>
             )}
             
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-white">
+              <label htmlFor="username" className="block text-sm sm:text-base font-medium text-white mb-1">
                 Username
               </label>
-              <div className="mt-1">
-                <input
-                  id="username"
-                  name="username"
-                  type="text"
-                  required
-                  value={formData.username}
-                  onChange={handleChange}
-                  className="appearance-none block w-full px-4 py-3 border border-white/30 rounded-xl placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 sm:text-sm bg-white/20 backdrop-blur-sm text-white transition-all duration-200"
-                  placeholder="Enter your username"
-                />
-              </div>
+              <input
+                id="username"
+                name="username"
+                type="text"
+                required
+                value={formData.username}
+                onChange={handleChange}
+                className="w-full responsive-input bg-white/20 border border-white/30 rounded-lg sm:rounded-xl placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent text-white optimized-backdrop optimized-transition-fast"
+                placeholder="Enter your username"
+              />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-white">
+              <label htmlFor="password" className="block text-sm sm:text-base font-medium text-white mb-1">
                 Password
               </label>
-              <div className="mt-1">
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  required
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="appearance-none block w-full px-4 py-3 border border-white/30 rounded-xl placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 sm:text-sm bg-white/20 backdrop-blur-sm text-white transition-all duration-200"
-                  placeholder="Enter your password"
-                />
-              </div>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                value={formData.password}
+                onChange={handleChange}
+                className="w-full responsive-input bg-white/20 border border-white/30 rounded-lg sm:rounded-xl placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent text-white optimized-backdrop optimized-transition-fast"
+                placeholder="Enter your password"
+              />
             </div>
 
             <div className="flex items-center justify-between">
@@ -137,15 +284,15 @@ export default function AdminLoginPage() {
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-white/30 rounded bg-white/20"
+                  className="h-3 w-3 sm:h-4 sm:w-4 text-blue-500 focus:ring-blue-400 border-white/30 rounded bg-white/20 optimized-transition"
                 />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-white">
+                <label htmlFor="remember-me" className="ml-2 block text-xs sm:text-sm text-white optimized-transition">
                   Remember me
                 </label>
               </div>
 
-              <div className="text-sm">
-                <a href="#" className="font-medium text-blue-300 hover:text-blue-200">
+              <div className="text-xs sm:text-sm">
+                <a href="#" className="font-medium text-blue-200 hover:text-blue-100 optimized-transition">
                   Forgot your password?
                 </a>
               </div>
@@ -155,11 +302,11 @@ export default function AdminLoginPage() {
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex justify-center py-3 px-6 border border-transparent rounded-xl shadow-lg text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-all duration-200 transform hover:scale-105"
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg sm:rounded-xl shadow-lg text-sm sm:text-base font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 optimized-transition"
               >
                 {isLoading ? (
                   <>
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 sm:h-5 sm:w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
@@ -172,27 +319,27 @@ export default function AdminLoginPage() {
             </div>
           </form>
 
-           {/* Demo Credentials */}
-           <div className="mt-6 p-4 bg-blue-500/20 rounded-xl border border-blue-400/30 backdrop-blur-sm">
-             <h3 className="text-sm font-medium text-blue-200 mb-2">
-               Demo Credentials
-             </h3>
-             <p className="text-xs text-blue-100">
-               Username: <code className="bg-blue-400/30 px-2 py-1 rounded text-white">admin</code><br/>
-               Password: <code className="bg-blue-400/30 px-2 py-1 rounded text-white">password</code>
-             </p>
-           </div>
-        </div>
+          {/* Demo Credentials */}
+          <div className="p-3 bg-blue-500/20 rounded-lg sm:rounded-xl border border-blue-400/30 optimized-backdrop">
+            <h3 className="text-sm sm:text-base font-medium text-blue-100 mb-1">
+              Demo Credentials
+            </h3>
+            <p className="text-xs sm:text-sm text-blue-50">
+              Username: <code className="bg-blue-400/30 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded text-white">admin</code><br/>
+              Password: <code className="bg-blue-400/30 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded text-white">password</code>
+            </p>
+          </div>
 
-         {/* Back to Home */}
-         <div className="text-center">
-           <Link 
-             href="/" 
-             className="text-sm text-blue-300 hover:text-blue-200"
-           >
-             ← Back to Home
-           </Link>
-         </div>
+          {/* Back to Home */}
+          <div className="text-center pt-2">
+            <Link 
+              href="/" 
+              className="text-sm sm:text-base text-blue-200 hover:text-blue-100 optimized-transition"
+            >
+              ← Back to Home
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   )

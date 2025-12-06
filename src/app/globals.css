@@ -48,6 +48,12 @@
 }
 
 @layer base {
+  html, body {
+    width: 100vw;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
@@ -75,4 +81,29 @@
   .placeholder-image {
     width: 90%;
   }
+}
+
+/* User images panel styles */
+.user-images-panel {
+  transition: all 0.3s ease-in-out;
+}
+
+.user-images-panel img {
+  transition: transform 0.2s ease-in-out;
+}
+
+.user-images-panel img:hover {
+  transform: scale(1.02);
+}
+
+/* Ensure all pages fill the screen */
+#__next {
+  width: 100vw;
+  min-height: 100vh;
+}
+
+/* Fix for Next.js root div */
+div[id="__next"] {
+  width: 100vw;
+  min-height: 100vh;
 }
