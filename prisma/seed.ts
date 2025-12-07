@@ -47,6 +47,8 @@ async function main() {
       title: 'Welcome to Our Church',
       description: 'An introduction to our church community and values',
       content: 'Welcome to our church family! We are excited to have you join us on this spiritual journey...',
+      year: 2024,
+      quarter: 'Q1',
       languageId: english.id,
       isPublished: true,
       order: 1,
@@ -61,6 +63,8 @@ async function main() {
       title: 'Bienvenidos a Nuestra Iglesia',
       description: 'Una introducción a nuestra comunidad eclesiástica y valores',
       content: '¡Bienvenidos a nuestra familia de la iglesia! Estamos emocionados de tenerlos con nosotros en este viaje espiritual...',
+      year: 2024,
+      quarter: 'Q1',
       languageId: spanish.id,
       isPublished: true,
       order: 1,
@@ -79,6 +83,3 @@ main()
   .finally(async () => {
     await prisma.$disconnect()
   })
-
-
-

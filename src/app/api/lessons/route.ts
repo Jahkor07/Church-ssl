@@ -46,14 +46,18 @@ export async function POST(req: NextRequest) {
               day: section.day,
               content: section.content,
               bibleTexts: section.bibleTexts,
-              order: 0 // Default order
+              order: section.order || 0
             }))
           }
         })
       },
       include: {
         language: true,
-        sections: true
+        sections: {
+          orderBy: {
+            order: 'asc'
+          }
+        }
       }
     });
 
@@ -96,7 +100,12 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
         id
       },
       include: {
-        language: true
+        language: true,
+        sections: {
+          orderBy: {
+            order: 'asc'
+          }
+        }
       }
     });
 
@@ -117,7 +126,10 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       language: {
         languageId: lesson.languageId,
         languageName: lesson.language.name
-      }
+      },
+      isPublished: lesson.isPublished,
+      order: lesson.order,
+      sections: lesson.sections || []
     });
   } catch (error) {
     console.error('Error fetching lesson:', error);
@@ -178,14 +190,18 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
               day: section.day,
               content: section.content,
               bibleTexts: section.bibleTexts,
-              order: 0 // Default order
+              order: section.order || 0
             }))
           }
         })
       },
       include: {
         language: true,
-        sections: true
+        sections: {
+          orderBy: {
+            order: 'asc'
+          }
+        }
       }
     });
 

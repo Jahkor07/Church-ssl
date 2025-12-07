@@ -65,5 +65,21 @@ module.exports = {
     },
   },
   plugins: [],
+  // Optimize Tailwind for performance
+  corePlugins: {
+    preflight: true,
+  },
+  // Reduce the size of the generated CSS
+  purge: {
+    enabled: true,
+    content: [
+      './src/**/*.{js,jsx,ts,tsx,mdx}',
+      './public/index.html',
+    ],
+    options: {
+      safelist: [
+        'dark', // safelist 'dark' class
+      ],
+    },
+  },
 }
-

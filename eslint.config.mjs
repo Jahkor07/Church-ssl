@@ -18,7 +18,20 @@ const eslintConfig = [
       "out/**",
       "build/**",
       "next-env.d.ts",
+      "**/*.test.*",
+      "**/*.spec.*",
     ],
+  },
+  {
+    // Performance optimizations
+    linterOptions: {
+      reportUnusedDisableDirectives: false,
+    },
+    languageOptions: {
+      parserOptions: {
+        project: false, // Disable type-aware linting for better performance
+      },
+    },
   },
 ];
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
@@ -13,95 +13,138 @@ import {
   Globe,
   BookOpen,
   Search,
-  Filter
+  Filter,
+  AlertCircle
 } from 'lucide-react'
+import { deleteLesson, searchLessons } from '@/lib/lessonActions'
 
-// Mock lesson data
-const mockLessons = [
+interface Lesson {
+  id: string
+  title: string
+  year: number
+  language: {
+    name: string
+  }
+  isPublished: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+// Mock data for when API is not available
+const mockLessons: Lesson[] = [
   {
     id: '1',
     title: 'The Beginning of the Gospel',
     year: 2024,
-    language: 'English',
-    status: 'Published',
-    createdAt: '2024-01-15',
-    updatedAt: '2024-01-20'
+    language: { name: 'English' },
+    isPublished: true,
+    createdAt: '2024-01-15T00:00:00Z',
+    updatedAt: '2024-01-20T00:00:00Z'
   },
   {
     id: '2',
     title: 'Faith and Works',
     year: 2024,
-    language: 'Spanish',
-    status: 'Draft',
-    createdAt: '2024-01-18',
-    updatedAt: '2024-01-22'
+    language: { name: 'Spanish' },
+    isPublished: false,
+    createdAt: '2024-01-18T00:00:00Z',
+    updatedAt: '2024-01-22T00:00:00Z'
   },
   {
     id: '3',
     title: 'The Kingdom of God',
     year: 2024,
-    language: 'English',
-    status: 'Published',
-    createdAt: '2024-01-20',
-    updatedAt: '2024-01-25'
-  },
-  {
-    id: '4',
-    title: 'Prayer and Meditation',
-    year: 2023,
-    language: 'French',
-    status: 'Published',
-    createdAt: '2023-12-10',
-    updatedAt: '2023-12-15'
-  },
-  {
-    id: '5',
-    title: 'The Holy Spirit',
-    year: 2024,
-    language: 'English',
-    status: 'Draft',
-    createdAt: '2024-01-25',
-    updatedAt: '2024-01-28'
+    language: { name: 'English' },
+    isPublished: true,
+    createdAt: '2024-01-20T00:00:00Z',
+    updatedAt: '2024-01-25T00:00:00Z'
   }
 ]
 
 export default function AdminLessonsPage() {
+  const [lessons, setLessons] = useState<Lesson[]>(mockLessons)
+  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedYear, setSelectedYear] = useState('All')
   const [selectedLanguage, setSelectedLanguage] = useState('All')
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [lessonToDelete, setLessonToDelete] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [apiAvailable, setApiAvailable] = useState<boolean>(false)
   const router = useRouter()
 
-  const filteredLessons = mockLessons.filter(lesson => {
-    const matchesSearch = lesson.title.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesYear = selectedYear === 'All' || lesson.year.toString() === selectedYear
-    const matchesLanguage = selectedLanguage === 'All' || lesson.language === selectedLanguage
-    return matchesSearch && matchesYear && matchesLanguage
-  })
+  // Fetch lessons from API
+  useEffect(() => {
+    fetchLessons()
+  }, [])
+
+  const fetchLessons = async () => {
+    try {
+      setLoading(true)
+      console.log('Fetching lessons...')
+      const result = await searchLessons('', 1, 100) // Get all lessons for now
+    
+      // If we get a successful response, update state
+      if (result && result.lessons) {
+        console.log('Successfully fetched lessons:', result.lessons.length)
+        setLessons(result.lessons)
+        setApiAvailable(true)
+        setError(null)
+      } else {
+        console.log('No lessons data in response')
+        setApiAvailable(false)
+        setError('No lessons data received from server')
+      }
+    } catch (err) {
+      console.error('API Error:', err)
+      // Use mock data when API is not available
+      setLessons(mockLessons)
+      setApiAvailable(false)
+      setError(`Unable to connect to the database. Showing sample data. Error: ${err.message || 'Unknown error'}`)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleDelete = (lessonId: string) => {
     setLessonToDelete(lessonId)
     setShowDeleteModal(true)
   }
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (lessonToDelete) {
-      console.log('Deleting lesson:', lessonToDelete)
-      setShowDeleteModal(false)
-      setLessonToDelete(null)
+      try {
+        // Only try to delete if API is available
+        if (apiAvailable) {
+          const success = await deleteLesson(lessonToDelete)
+          if (success) {
+            // Remove the lesson from the local state
+            setLessons(lessons.filter(lesson => lesson.id !== lessonToDelete))
+          } else {
+            setError('Failed to delete lesson')
+          }
+        } else {
+          // For mock data, just remove from state
+          setLessons(lessons.filter(lesson => lesson.id !== lessonToDelete))
+        }
+        
+        setShowDeleteModal(false)
+        setLessonToDelete(null)
+      } catch (err) {
+        console.error('Error deleting lesson:', err)
+        setError('Failed to delete lesson')
+      }
     }
   }
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Published':
-        return 'bg-green-100 text-green-800'
-      case 'Draft':
-        return 'bg-yellow-100 text-yellow-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
-    }
+  const getStatusColor = (isPublished: boolean) => {
+    return isPublished 
+      ? 'bg-green-100 text-green-800' 
+      : 'bg-yellow-100 text-yellow-800'
+  }
+
+  const getStatusText = (isPublished: boolean) => {
+    return isPublished ? 'Published' : 'Draft'
   }
 
   return (
@@ -115,12 +158,25 @@ export default function AdminLessonsPage() {
           </p>
         </div>
         <Button asChild>
-          <Link href="/admin/lessons/upload">
+          <Link href="/admin/lessons/new">
             <Plus className="w-4 h-4 mr-2" />
-            Upload New Lesson
+            Create New Lesson
           </Link>
         </Button>
       </div>
+
+      {/* API Status Warning */}
+      {!apiAvailable && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-start">
+          <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5 mr-2 flex-shrink-0" />
+          <div>
+            <h3 className="text-yellow-800 font-medium">Database Connection Issue</h3>
+            <p className="text-yellow-700 text-sm mt-1">
+              Unable to connect to the database. Displaying sample data. Some features may not work as expected.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Search and Filters */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -148,7 +204,7 @@ export default function AdminLessonsPage() {
                 onChange={(e) => setSelectedYear(e.target.value)}
                 className="w-full pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 appearance-none"
               >
-                <option>All Years</option>
+                <option value="All">All Years</option>
                 <option>2024</option>
                 <option>2023</option>
                 <option>2022</option>
@@ -165,7 +221,7 @@ export default function AdminLessonsPage() {
                 onChange={(e) => setSelectedLanguage(e.target.value)}
                 className="w-full pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 appearance-none"
               >
-                <option>All Languages</option>
+                <option value="All">All Languages</option>
                 <option>English</option>
                 <option>Spanish</option>
                 <option>French</option>
@@ -176,112 +232,128 @@ export default function AdminLessonsPage() {
         </div>
       </div>
 
+      {/* Loading State */}
+      {loading && (
+        <div className="flex justify-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && !loading && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-700">{error}</p>
+        </div>
+      )}
+
       {/* Lessons Table */}
-      <div className="bg-white shadow overflow-hidden sm:rounded-md">
-        <div className="px-4 py-5 sm:px-6">
-          <h3 className="text-lg leading-6 font-medium text-gray-900">
-            All Lessons ({filteredLessons.length})
-          </h3>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Title
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Year
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Language
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Updated
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredLessons.map((lesson) => (
-                <tr key={lesson.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-normal max-w-xs">
-                    <div className="text-sm font-medium text-gray-900">
-                      {lesson.title}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center text-sm text-gray-500">
-                      <Calendar className="w-4 h-4 mr-1" />
-                      {lesson.year}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center text-sm text-gray-500">
-                      <Globe className="w-4 h-4 mr-1" />
-                      {lesson.language}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(lesson.status)}`}>
-                      {lesson.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(lesson.updatedAt).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div className="flex items-center justify-end space-x-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => router.push(`/admin/lessons/${lesson.id}`)}
-                      >
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => router.push(`/admin/lessons/${lesson.id}/edit`)}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(lesson.id)}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </td>
+      {!loading && (
+        <div className="bg-white shadow overflow-hidden sm:rounded-md">
+          <div className="px-4 py-5 sm:px-6">
+            <h3 className="text-lg leading-6 font-medium text-gray-900">
+              All Lessons ({lessons.length})
+            </h3>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Title
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Year
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Language
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Updated
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {lessons.map((lesson) => (
+                  <tr key={lesson.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-normal max-w-xs">
+                      <div className="text-sm font-medium text-gray-900">
+                        {lesson.title}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center text-sm text-gray-500">
+                        <Calendar className="w-4 h-4 mr-1" />
+                        {lesson.year}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center text-sm text-gray-500">
+                        <Globe className="w-4 h-4 mr-1" />
+                        {lesson.language?.name || 'Unknown'}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(lesson.isPublished)}`}>
+                        {getStatusText(lesson.isPublished)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {new Date(lesson.updatedAt).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <div className="flex items-center justify-end space-x-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => router.push(`/admin/lessons/${lesson.id}`)}
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => router.push(`/admin/lessons/${lesson.id}/edit`)}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(lesson.id)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Empty State */}
-      {filteredLessons.length === 0 && (
+      {!loading && lessons.length === 0 && (
         <div className="text-center py-12">
           <BookOpen className="w-12 h-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">
             No lessons found
           </h3>
           <p className="text-gray-600 mb-4">
-            Try adjusting your search terms or filters
+            Get started by creating a new lesson
           </p>
           <Button asChild>
-            <Link href="/admin/lessons/upload">
+            <Link href="/admin/lessons/new">
               <Plus className="w-4 h-4 mr-2" />
-              Upload New Lesson
+              Create New Lesson
             </Link>
           </Button>
         </div>

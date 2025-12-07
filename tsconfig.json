@@ -20,8 +20,12 @@
     ],
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    // Performance optimizations
+    "assumeChangesOnlyAffectDirectDependencies": true,
+    "disableSizeLimit": false,
+    "maxNodeModuleJsDepth": 2
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", ".next", "out"]
 }

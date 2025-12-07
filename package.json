@@ -12,7 +12,9 @@
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:seed": "tsx prisma/seed.ts",
+    "clean": "node scripts/clean-dev.js",
+    "clean-dev": "npm run clean && npm run dev"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.32.0",
