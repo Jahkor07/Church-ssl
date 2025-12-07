@@ -81,26 +81,20 @@ export default function AdminLessonsPage() {
   const fetchLessons = async () => {
     try {
       setLoading(true)
-      console.log('Fetching lessons...')
       const result = await searchLessons('', 1, 100) // Get all lessons for now
-    
+      
       // If we get a successful response, update state
       if (result && result.lessons) {
-        console.log('Successfully fetched lessons:', result.lessons.length)
         setLessons(result.lessons)
         setApiAvailable(true)
         setError(null)
-      } else {
-        console.log('No lessons data in response')
-        setApiAvailable(false)
-        setError('No lessons data received from server')
       }
     } catch (err) {
       console.error('API Error:', err)
       // Use mock data when API is not available
       setLessons(mockLessons)
       setApiAvailable(false)
-      setError(`Unable to connect to the database. Showing sample data. Error: ${err.message || 'Unknown error'}`)
+      setError('Unable to connect to the database. Showing sample data.')
     } finally {
       setLoading(false)
     }

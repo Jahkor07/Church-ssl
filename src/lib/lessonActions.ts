@@ -50,36 +50,24 @@ export async function deleteLessons(ids: string[]): Promise<boolean> {
 // Search lessons
 export async function searchLessons(query: string, page: number = 1, limit: number = 10) {
   try {
-    // Construct URL with proper query parameters
-    const url = new URL('/api/lessons/search', window.location.origin);
-    
-    if (query) {
-      url.searchParams.append('q', query);
-    }
-    
-    url.searchParams.append('page', page.toString());
-    url.searchParams.append('limit', limit.toString());
-    
-    console.log('Fetching from URL:', url.toString());
-    
-    const response = await fetch(url.toString());
+    // If query is empty, we still want to get all lessons
+    const queryString = query ? `q=${encodeURIComponent(query)}&` : '';
+    const response = await fetch(`/api/lessons/search?${queryString}page=${page}&limit=${limit}`)
     
     // Check if response is JSON
-    const contentType = response.headers.get('content-type');
+    const contentType = response.headers.get('content-type')
     if (!contentType || !contentType.includes('application/json')) {
-      const text = await response.text();
-      console.error('Non-JSON response:', text.substring(0, 200) + '...');
-      throw new Error(`Received non-JSON response from server. Status: ${response.status}`);
+      throw new Error('Received non-JSON response from server')
     }
     
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to search lessons');
+      const error = await response.json()
+      throw new Error(error.error || 'Failed to search lessons')
     }
     
-    return await response.json();
+    return await response.json()
   } catch (error) {
-    console.error('Error searching lessons:', error);
-    throw error;
+    console.error('Error searching lessons:', error)
+    throw error
   }
 }

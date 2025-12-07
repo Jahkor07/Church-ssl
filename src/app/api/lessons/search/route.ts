@@ -1,17 +1,13 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { type NextRequest } from 'next/server';
 
 // GET /api/lessons/search?q=searchTerm - Search lessons
-export async function GET(req: NextRequest) {
+export async function GET(request: Request) {
   try {
-    console.log('Search API called');
-    const { searchParams } = new URL(req.url);
+    const { searchParams } = new URL(request.url);
     const query = searchParams.get('q');
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
-    
-    console.log('Query params:', { query, page, limit });
     
     const skip = (page - 1) * limit;
     
@@ -45,8 +41,6 @@ export async function GET(req: NextRequest) {
       ]
     } : {};
     
-    console.log('Search conditions:', searchConditions);
-    
     // Search lessons by title, description, content, or keywords
     const lessons = await prisma.lesson.findMany({
       where: searchConditions,
@@ -65,16 +59,12 @@ export async function GET(req: NextRequest) {
       take: limit
     });
     
-    console.log('Found lessons:', lessons.length);
-    
     // Get total count for pagination
     const totalCount = await prisma.lesson.count({
       where: searchConditions
     });
     
-    console.log('Total count:', totalCount);
-    
-    const result = {
+    return NextResponse.json({
       lessons: lessons.map((lesson: any) => ({
         id: lesson.id,
         title: lesson.title,
@@ -94,14 +84,11 @@ export async function GET(req: NextRequest) {
         hasNextPage: page < Math.ceil(totalCount / limit),
         hasPrevPage: page > 1
       }
-    };
-    
-    console.log('Returning result');
-    return NextResponse.json(result);
-  } catch (error: any) {
+    });
+  } catch (error) {
     console.error('Error searching lessons:', error);
     return NextResponse.json(
-      { error: 'Failed to search lessons: ' + (error.message || 'Unknown error') },
+      { error: 'Failed to search lessons' },
       { status: 500 }
     );
   }
