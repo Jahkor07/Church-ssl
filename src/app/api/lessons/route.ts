@@ -3,6 +3,27 @@ import { prisma } from '@/lib/prisma';
 import { getAuth } from '@clerk/nextjs/server';
 import { type NextRequest } from 'next/server';
 
+// Format lesson data for API responses
+function formatLessonResponse(lesson: any) {
+  return {
+    lessonId: lesson.id,
+    title: lesson.title,
+    description: lesson.description,
+    content: lesson.content,
+    year: lesson.year,
+    quarter: lesson.quarter,
+    introduction: lesson.introduction,
+    keywords: lesson.keywords,
+    language: {
+      languageId: lesson.languageId,
+      languageName: lesson.language.name
+    },
+    isPublished: lesson.isPublished,
+    order: lesson.order,
+    sections: lesson.sections || []
+  };
+}
+
 // POST /api/lessons - Create a new lesson
 export async function POST(req: NextRequest) {
   try {
@@ -62,21 +83,7 @@ export async function POST(req: NextRequest) {
     });
 
     // Return the created lesson with the proper response format
-    return NextResponse.json({
-      lessonId: lesson.id,
-      title: lesson.title,
-      description: lesson.description,
-      content: lesson.content,
-      year: lesson.year,
-      quarter: lesson.quarter,
-      introduction: lesson.introduction,
-      keywords: lesson.keywords,
-      language: {
-        languageId: lesson.languageId,
-        languageName: lesson.language.name
-      },
-      sections: lesson.sections || []
-    }, { status: 201 });
+    return NextResponse.json(formatLessonResponse(lesson), { status: 201 });
   } catch (error) {
     console.error('Error creating lesson:', error);
     return NextResponse.json(
@@ -114,23 +121,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     }
 
     // Return the lesson with the proper response format
-    return NextResponse.json({
-      lessonId: lesson.id,
-      title: lesson.title,
-      description: lesson.description,
-      content: lesson.content,
-      year: lesson.year,
-      quarter: lesson.quarter,
-      introduction: lesson.introduction,
-      keywords: lesson.keywords,
-      language: {
-        languageId: lesson.languageId,
-        languageName: lesson.language.name
-      },
-      isPublished: lesson.isPublished,
-      order: lesson.order,
-      sections: lesson.sections || []
-    });
+    return NextResponse.json(formatLessonResponse(lesson));
   } catch (error) {
     console.error('Error fetching lesson:', error);
     return NextResponse.json(
@@ -206,23 +197,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     });
 
     // Return the updated lesson with the proper response format
-    return NextResponse.json({
-      lessonId: lesson.id,
-      title: lesson.title,
-      description: lesson.description,
-      content: lesson.content,
-      year: lesson.year,
-      quarter: lesson.quarter,
-      introduction: lesson.introduction,
-      keywords: lesson.keywords,
-      language: {
-        languageId: lesson.languageId,
-        languageName: lesson.language.name
-      },
-      isPublished: lesson.isPublished,
-      order: lesson.order,
-      sections: lesson.sections || []
-    });
+    return NextResponse.json(formatLessonResponse(lesson));
   } catch (error) {
     console.error('Error updating lesson:', error);
     return NextResponse.json(

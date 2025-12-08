@@ -12,7 +12,7 @@ export async function GET(request: Request) {
     const skip = (page - 1) * limit;
     
     // Define search conditions
-    const searchConditions = query ? {
+    const searchConditions: any = query ? {
       OR: [
         {
           title: {

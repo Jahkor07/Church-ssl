@@ -66,8 +66,15 @@ export async function searchLessons(query: string, page: number = 1, limit: numb
     }
     
     return await response.json()
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error searching lessons:', error)
+    
+    // If it's a network error (likely database connection issue), rethrow with specific message
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      // Network error - likely database connection issue
+      throw new Error('DATABASE_CONNECTION_ERROR')
+    }
+    
     throw error
   }
 }

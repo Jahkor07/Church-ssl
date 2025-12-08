@@ -163,16 +163,20 @@ The project includes Docker Compose for PostgreSQL:
 
 ## 🔧 Troubleshooting
 
-### Common Issues
+### Common Issues and Solutions
 
-1. **Clerk Authentication Not Working**
-   - Verify your Clerk keys in `.env`
+1. **Admin Login Not Working**
+   - Verify Clerk keys in `.env`
    - Check that your Clerk application URLs match the environment variables
 
 2. **Database Connection Issues**
    - Ensure Docker is running
    - Check that PostgreSQL container is up: `docker-compose ps`
    - Verify DATABASE_URL in `.env`
+   - Try restarting Docker: `docker-compose down && docker-compose up -d`
+   - Check if port 5432 is already in use by another application
+   - On Windows, try running Docker as Administrator
+   - If Docker isn't working, you can install PostgreSQL locally and update the DATABASE_URL accordingly
 
 3. **Rich Text Editor Not Loading**
    - Check browser console for errors
@@ -181,6 +185,37 @@ The project includes Docker Compose for PostgreSQL:
 4. **Form Validation Errors**
    - Check that all required fields are filled
    - Verify data types match the schema
+
+### Advanced Database Troubleshooting
+
+If you're still having database connection issues:
+
+1. **Test the database connection directly:**
+   ```bash
+   node test-db-connection.js
+   ```
+
+2. **Check Docker logs:**
+   ```bash
+   docker-compose logs postgres
+   ```
+
+3. **Verify the database is accepting connections:**
+   ```bash
+   docker exec -it church-ssl-postgres-1 pg_isready
+   ```
+
+4. **Manually connect to the database:**
+   ```bash
+   docker exec -it church-ssl-postgres-1 psql -U postgres -d church_ssl
+   ```
+
+5. **Reset the database completely:**
+   ```bash
+   docker-compose down -v
+   docker-compose up -d
+   npm run db:push
+   ```
 
 ### Getting Help
 

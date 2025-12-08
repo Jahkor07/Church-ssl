@@ -14,7 +14,11 @@
     "db:studio": "prisma studio",
     "db:seed": "tsx prisma/seed.ts",
     "clean": "node scripts/clean-dev.js",
-    "clean-dev": "npm run clean && npm run dev"
+    "clean-dev": "npm run clean && npm run dev",
+    "setup": "docker-compose up -d && npm run db:generate && npm run db:push",
+    "setup-with-seed": "docker-compose up -d && npm run db:generate && npm run db:push && npm run db:seed",
+    "check-db": "node check-db.js",
+    "dev:ngrok": "NEXT_PUBLIC_API_BASE_URL=https://myrl-readaptive-dedicatorily.ngrok-free.dev next dev"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.32.0",

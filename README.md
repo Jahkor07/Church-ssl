@@ -27,7 +27,7 @@ A modern Next.js 14 application with App Router, Tailwind CSS, Prisma ORM, and P
 ### Prerequisites
 
 - Node.js 18+ 
-- Docker and Docker Compose
+- Docker and Docker Compose (recommended)
 - npm or yarn
 
 ### Installation
@@ -40,7 +40,7 @@ A modern Next.js 14 application with App Router, Tailwind CSS, Prisma ORM, and P
 2. **Set up environment variables:**
    Create a `.env` file in the root directory:
    ```env
-   DATABASE_URL="postgresql://church_user:church_password@localhost:5432/church_db?schema=public"
+   DATABASE_URL="postgresql://postgres:password@localhost:5432/church_ssl?schema=public"
    NEXTAUTH_SECRET="your-secret-key-here"
    NEXTAUTH_URL="http://localhost:3000"
    ```
@@ -60,12 +60,27 @@ A modern Next.js 14 application with App Router, Tailwind CSS, Prisma ORM, and P
    npm run db:push
    ```
 
-6. **Start the development server:**
+6. **Seed database with sample data (optional):**
+   ```bash
+   npm run db:seed
+   ```
+
+7. **Start the development server:**
    ```bash
    npm run dev
    ```
 
 Open [http://localhost:3000](http://localhost:3000) to view the application.
+
+## Database Connection Issues
+
+If you encounter database connection issues, please refer to the detailed [Database Setup Guide](DATABASE_SETUP.md) for troubleshooting steps.
+
+Common issues and solutions:
+
+1. **Docker not running**: Ensure Docker Desktop is running before starting the database
+2. **Port conflicts**: Make sure no other application is using port 5432
+3. **Permission issues**: Try running Docker as administrator on Windows
 
 ## Database Models
 

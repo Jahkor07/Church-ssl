@@ -14,7 +14,8 @@ import {
   BookOpen,
   Search,
   Filter,
-  AlertCircle
+  AlertCircle,
+  Database
 } from 'lucide-react'
 import { deleteLesson, searchLessons } from '@/lib/lessonActions'
 
@@ -89,12 +90,21 @@ export default function AdminLessonsPage() {
         setApiAvailable(true)
         setError(null)
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('API Error:', err)
-      // Use mock data when API is not available
-      setLessons(mockLessons)
-      setApiAvailable(false)
-      setError('Unable to connect to the database. Showing sample data.')
+      
+      // Check if it's a database connection error
+      if (err.message === 'DATABASE_CONNECTION_ERROR') {
+        // Use mock data when API is not available
+        setLessons(mockLessons)
+        setApiAvailable(false)
+        setError('Unable to connect to the database. Displaying sample data. Some features may not work as expected.')
+      } else {
+        // Use mock data for any other error
+        setLessons(mockLessons)
+        setApiAvailable(false)
+        setError('Failed to load lessons. Displaying sample data.')
+      }
     } finally {
       setLoading(false)
     }
@@ -168,6 +178,9 @@ export default function AdminLessonsPage() {
             <p className="text-yellow-700 text-sm mt-1">
               Unable to connect to the database. Displaying sample data. Some features may not work as expected.
             </p>
+            <p className="text-yellow-700 text-sm mt-2">
+              Please ensure PostgreSQL is running on port 5432 and the database is properly configured.
+            </p>
           </div>
         </div>
       )}
@@ -236,7 +249,10 @@ export default function AdminLessonsPage() {
       {/* Error State */}
       {error && !loading && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-700">{error}</p>
+          <div className="flex items-start">
+            <Database className="w-5 h-5 text-red-600 mt-0.5 mr-2 flex-shrink-0" />
+            <p className="text-red-700">{error}</p>
+          </div>
         </div>
       )}
 

@@ -6,7 +6,7 @@ const port = 8080;
 
 // Proxy middleware
 const apiProxy = createProxyMiddleware({
-  target: 'http://localhost:3000',
+  target: 'https://myrl-readaptive-dedicatorily.ngrok-free.dev',
   changeOrigin: true,
   pathRewrite: {
     '^/api': '/api', // remove /api prefix
@@ -18,5 +18,5 @@ app.use('/api', apiProxy);
 
 app.listen(port, () => {
   console.log(`Proxy server listening at http://localhost:${port}`);
-  console.log(`API requests will be forwarded to http://localhost:3000`);
+  console.log(`API requests will be forwarded to https://myrl-readaptive-dedicatorily.ngrok-free.dev`);
 });

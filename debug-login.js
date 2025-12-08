@@ -1,7 +1,7 @@
 // Simple debug script to test login endpoint
 console.log('Testing login endpoint...');
 
-fetch('/api/admin/login', {
+fetch('https://myrl-readaptive-dedicatorily.ngrok-free.dev/api/admin/login', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
