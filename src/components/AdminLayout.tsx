@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
@@ -15,14 +15,14 @@ import {
   X,
   LogOut,
   User,
-  Moon,
-  Sun
+  Calendar
 } from 'lucide-react'
 import ProtectedRoute from '@/components/ProtectedRoute'
 
 const navigation = [
   { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
   { name: 'Lessons', href: '/admin/lessons', icon: BookOpen },
+  { name: 'Lessons by Quarter', href: '/admin/lessons/by-quarter', icon: Calendar },
   { name: 'Upload Lesson', href: '/admin/lessons/upload', icon: Upload },
   { name: 'Settings', href: '/admin/settings', icon: Settings },
 ]
@@ -33,21 +33,15 @@ interface AdminLayoutProps {
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [darkMode, setDarkMode] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
   
   // Check if we're on the login page
   const isLoginPage = pathname === '/admin/login'
+  // Check if we're on the main dashboard page
+  const isDashboardPage = pathname === '/admin' || pathname === '/admin/' || pathname === '/admin/dashboard'
 
-  // Load dark mode preference from localStorage on mount
-  useEffect(() => {
-    const savedDarkMode = localStorage.getItem('darkMode') === 'true'
-    setDarkMode(savedDarkMode)
-    if (savedDarkMode) {
-      document.documentElement.classList.add('dark')
-    }
-  }, [])
+
 
   // Handle logout
   const handleLogout = () => {
@@ -60,16 +54,20 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     <ProtectedRoute>
       {/* Full screen container with flex centering similar to homepage */}
       <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden">
-        {/* Background Image - using same classes as homepage */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: `url('/images/backgrounds/S3.jpg')`
-          }}
-        ></div>
-        
-        {/* Background Overlay - using same approach as homepage */}
-        <div className="absolute inset-0 bg-gray-50/95 dark:bg-gray-900/95"></div>
+        {/* Background Image - only show on dashboard page */}
+        {isDashboardPage && (
+          <>
+            <div 
+              className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+              style={{
+                backgroundImage: `url('/images/backgrounds/S3.jpg')`
+              }}
+            ></div>
+            
+            {/* Background Overlay - using same approach as homepage */}
+            <div className="absolute inset-0 bg-gray-50/95 dark:bg-gray-900/95"></div>
+          </>
+        )}
         
         {/* Mobile sidebar overlay */}
         {sidebarOpen && (
@@ -186,7 +184,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           )}
 
           {/* Main content area - ensure it fills the screen and centers content */}
-          <main className="flex-1 w-full flex items-center justify-center">
+          <main className="flex-1 w-full flex items-center justify-center pt-16">
             <div className="py-6 w-full h-full flex items-center justify-center">
               <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full h-full flex items-center justify-center">
                 {/* Wrap main content with fallback image */}
