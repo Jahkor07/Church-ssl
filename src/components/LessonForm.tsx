@@ -10,6 +10,7 @@ import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import { Plus, Trash2, X, Save } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useTheme } from '@/contexts/ThemeContext'
 
 const lessonSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -48,6 +49,7 @@ interface DailySection {
 }
 
 export default function LessonForm({ initialData, isEditing = false, singleColumn = false }: LessonFormProps & { singleColumn?: boolean }) {
+  const { theme } = useTheme()
   const router = useRouter()
   const [languages, setLanguages] = useState<Language[]>([])
   const [loading, setLoading] = useState(false)

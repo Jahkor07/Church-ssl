@@ -18,6 +18,7 @@ import {
   Calendar
 } from 'lucide-react'
 import ProtectedRoute from '@/components/ProtectedRoute'
+import { useTheme } from '@/contexts/ThemeContext'
 
 const navigation = [
   { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
@@ -32,6 +33,7 @@ interface AdminLayoutProps {
 }
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
+  const { theme } = useTheme()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
   const router = useRouter()

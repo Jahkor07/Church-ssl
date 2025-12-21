@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: ssl-backend
+  datasource:
+    url: jdbc:postgresql://localhost:5432/church_ssl
+    username: postgres
+    password: password
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+server:
+  port: 9000
+
+# ===============================
+# JWT Configuration
+# ===============================
+jwt:
+  # Secret key for signing JWTs.
+  # IMPORTANT: This should be a strong, Base64-encoded secret.
+  # Generate a new one for production, e.g., by running:
+  # echo -n "your-very-strong-and-long-secret" | base64
+  secret: "c29tZS1zZWNyZXQta2V5LWZvci1kZXZlbG9wbWVudC1vbmx5" # Replace for production!
+  expiration-ms: 36000000 # 10 hours

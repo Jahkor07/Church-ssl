@@ -12,9 +12,10 @@ import {
   RefreshCw,
   Check
 } from 'lucide-react'
+import { useTheme } from '@/contexts/ThemeContext'
 
 export default function SettingsPage() {
-  const [darkMode, setDarkMode] = useState(false)
+  const { theme, setTheme } = useTheme()
   const [language, setLanguage] = useState('English')
   const [year, setYear] = useState('2024')
   const [showResetConfirm, setShowResetConfirm] = useState(false)
@@ -31,10 +32,7 @@ export default function SettingsPage() {
   }, [])
 
   const toggleDarkMode = () => {
-    const newDarkMode = !darkMode
-    setDarkMode(newDarkMode)
-    localStorage.setItem('dark-mode', newDarkMode.toString())
-    document.documentElement.classList.toggle('dark')
+    setTheme(theme === 'dark' ? 'light' : 'dark')
   }
 
   const updateLanguage = (newLanguage: string) => {
@@ -48,15 +46,14 @@ export default function SettingsPage() {
   }
 
   const resetSettings = () => {
-    localStorage.removeItem('dark-mode')
     localStorage.removeItem('preferred-language')
     localStorage.removeItem('preferred-year')
     localStorage.removeItem('user-notes')
     
-    setDarkMode(false)
     setLanguage('English')
     setYear('2024')
-    document.documentElement.classList.remove('dark')
+    // Reset theme to system preference
+    setTheme('system')
     setShowResetConfirm(false)
   }
 
@@ -93,7 +90,7 @@ export default function SettingsPage() {
                   onClick={toggleDarkMode}
                   className="flex items-center space-x-2"
                 >
-                  {darkMode ? (
+                  {theme === 'dark' ? (
                     <>
                       <Sun className="w-4 h-4" />
                       <span>Light</span>

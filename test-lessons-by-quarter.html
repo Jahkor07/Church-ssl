@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Lessons By Quarter</title>
+</head>
+<body>
+    <h1>Test Lessons By Quarter</h1>
+    <button onclick="testLessons()">Test Lessons API</button>
+    <div id="result"></div>
+
+    <script>
+        async function testLessons() {
+            try {
+                const response = await fetch('http://localhost:3000/api/lessons/by-quarter?year=2026&quarter=Q1');
+                const data = await response.json();
+                document.getElementById('result').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            } catch (error) {
+                document.getElementById('result').innerHTML = '<p>Error: ' + error.message + '</p>';
+            }
+        }
+    </script>
+</body>
+</html>

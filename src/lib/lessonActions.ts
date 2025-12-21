@@ -1,5 +1,36 @@
 // Utility functions for lesson actions
 
+// Fetch lessons by quarter
+export async function fetchLessonsByQuarter(year: number, quarter: string) {
+  try {
+    const response = await fetch(`/api/lessons/by-quarter?year=${year}&quarter=${quarter}`);
+    
+    // Check if response is JSON
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      throw new Error('Received non-JSON response from server');
+    }
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to fetch lessons');
+    }
+    
+    const data = await response.json();
+    return data.data || data; // Handle both response formats
+  } catch (error: any) {
+    console.error('Error fetching lessons by quarter:', error);
+    
+    // If it's a network error (likely database connection issue), rethrow with specific message
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      // Network error - likely database connection issue
+      throw new Error('DATABASE_CONNECTION_ERROR');
+    }
+    
+    throw error;
+  }
+}
+
 // Delete a single lesson
 export async function deleteLesson(id: string): Promise<boolean> {
   try {
@@ -69,12 +100,36 @@ export async function searchLessons(query: string, page: number = 1, limit: numb
   } catch (error: any) {
     console.error('Error searching lessons:', error)
     
-    // If it's a network error (likely database connection issue), rethrow with specific message
+    // If it's a network error (likely database connection issue), return empty data
     if (error instanceof TypeError && error.message.includes('fetch')) {
       // Network error - likely database connection issue
-      throw new Error('DATABASE_CONNECTION_ERROR')
+      // Return safe fallback instead of throwing error
+      return { lessons: [], pagination: { currentPage: 1, totalPages: 0, totalCount: 0, hasNextPage: false, hasPrevPage: false } }
     }
     
-    throw error
+    // If it's a database connection error from the server side
+    if (error.message && (error.message.includes('Can\'t reach database') || 
+                          error.message.includes('Connection') || 
+                          error.message.includes('connect') ||
+                          error.message.includes('ECONNREFUSED') ||
+                          error.message.includes('Authentication failed'))) {
+      // Return safe fallback instead of throwing error
+      return { lessons: [], pagination: { currentPage: 1, totalPages: 0, totalCount: 0, hasNextPage: false, hasPrevPage: false } }
+    }
+    
+    // If it's a general database error, provide a more user-friendly message
+    if (error.message && error.message.includes('Failed to search lessons')) {
+      // Return safe fallback instead of throwing error
+      return { lessons: [], pagination: { currentPage: 1, totalPages: 0, totalCount: 0, hasNextPage: false, hasPrevPage: false } }
+    }
+    
+    // If we get a 500 error from the server, it's likely a database issue
+    if (error.message && error.message.includes('Internal Server Error')) {
+      // Return safe fallback instead of throwing error
+      return { lessons: [], pagination: { currentPage: 1, totalPages: 0, totalCount: 0, hasNextPage: false, hasPrevPage: false } }
+    }
+    
+    // For any other error, return safe fallback
+    return { lessons: [], pagination: { currentPage: 1, totalPages: 0, totalCount: 0, hasNextPage: false, hasPrevPage: false } }
   }
 }

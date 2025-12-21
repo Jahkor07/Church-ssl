@@ -29,7 +29,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ThemeProvider>
-          <div className="page-transition-wrapper">
+          <div className="page-transition-wrapper w-full min-h-screen">
             {children}
           </div>
         </ThemeProvider>

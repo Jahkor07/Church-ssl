@@ -15,6 +15,7 @@ import {
   Globe,
   Calendar
 } from 'lucide-react'
+import { useTheme } from '@/contexts/ThemeContext'
 
 const navigation = [
   { name: 'Home', href: '/', icon: Home },
@@ -28,6 +29,7 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
+  const { theme, setTheme } = useTheme()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
 
@@ -168,7 +170,7 @@ export default function DashboardLayout({
                 variant="ghost"
                 size="icon"
                 onClick={() => {
-                  document.documentElement.classList.toggle('dark')
+                  setTheme(theme === 'dark' ? 'light' : 'dark')
                 }}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
