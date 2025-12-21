@@ -155,10 +155,19 @@ export default function LessonForm({ initialData, isEditing = false, singleColum
   const fetchLanguages = async () => {
     try {
       const response = await fetch('/api/languages')
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
       const data = await response.json()
       setLanguages(data)
     } catch (error) {
       console.error('Error fetching languages:', error)
+      // Set fallback languages in case of API failure
+      setLanguages([
+        { id: 'en', name: 'English', code: 'en', flag: '🇺🇸' },
+        { id: 'es', name: 'Spanish', code: 'es', flag: '🇪🇸' },
+        { id: 'fr', name: 'French', code: 'fr', flag: '🇫🇷' }
+      ])
     }
   }
 
