@@ -47,7 +47,7 @@ interface DailySection {
   order: number;
 }
 
-export default function LessonForm({ initialData, isEditing = false }: LessonFormProps) {
+export default function LessonForm({ initialData, isEditing = false, singleColumn = false }: LessonFormProps & { singleColumn?: boolean }) {
   const router = useRouter()
   const [languages, setLanguages] = useState<Language[]>([])
   const [loading, setLoading] = useState(false)
@@ -56,15 +56,18 @@ export default function LessonForm({ initialData, isEditing = false }: LessonFor
   const [previewData, setPreviewData] = useState<any>(null)
   const [error, setError] = useState<string | null>(null)
   
-  const [lesson, setLesson] = useState({
-    dailySections: [] as DailySection[]
+  const [lesson, setLesson] = useState<{
+    dailySections: DailySection[]
+  }>({
+    dailySections: []
   })
 
-  const [dailySection, setDailySection] = useState({
+  const [dailySection, setDailySection] = useState<DailySection>({
     day: 'Sunday',
     content: '',
     bibleTexts: '',
-    order: 0
+    order: 0,
+    id: undefined
   })
   
   const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
@@ -97,6 +100,9 @@ export default function LessonForm({ initialData, isEditing = false }: LessonFor
 
   // Update preview data when form fields change
   useEffect(() => {
+    // Only update if languages is an array
+    if (!Array.isArray(languages)) return;
+    
     // Find the selected language object
     const selectedLanguage = languages.find(lang => lang.id === watchedFields.languageId) || {
       id: watchedFields.languageId,
@@ -120,7 +126,7 @@ export default function LessonForm({ initialData, isEditing = false }: LessonFor
     }
 
     setPreviewData(formattedPreviewData)
-  }, [watchedFields, languages, lesson.dailySections])
+  }, [watchedFields.title, watchedFields.year, watchedFields.quarter, watchedFields.introduction, watchedFields.keywords, watchedFields.languageId, languages, lesson.dailySections])
 
   const watchedIntroduction = watch('introduction')
   const watchedContent = watch('content')
@@ -180,7 +186,7 @@ export default function LessonForm({ initialData, isEditing = false }: LessonFor
       
       // Set daily sections if they exist
       if (data.sections && Array.isArray(data.sections)) {
-        // Sort sections by order field
+        // Sort sections by order field and filter out empty sections
         const sortedSections = data.sections
           .sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
           .map((section: any) => ({
@@ -190,6 +196,7 @@ export default function LessonForm({ initialData, isEditing = false }: LessonFor
             bibleTexts: section.bibleTexts || '',
             order: section.order || 0
           }))
+          .filter((section: DailySection) => section.day && section.content.trim() && section.bibleTexts.trim())
         
         setLesson(prev => ({
           ...prev,
@@ -210,6 +217,18 @@ export default function LessonForm({ initialData, isEditing = false }: LessonFor
       const url = isEditing ? `/api/lessons/${initialData?.id}` : '/api/lessons'
       const method = isEditing ? 'PUT' : 'POST'
 
+      // Prepare daily sections for submission
+      // Filter out any sections without required content
+      const dailySections = lesson.dailySections
+        .filter(section => section.day && section.content.trim() && section.bibleTexts.trim())
+        .map(section => ({
+          id: section.id,
+          day: section.day,
+          content: section.content,
+          bibleTexts: section.bibleTexts,
+          order: section.order
+        }))
+
       const response = await fetch(url, {
         method,
         headers: {
@@ -217,13 +236,7 @@ export default function LessonForm({ initialData, isEditing = false }: LessonFor
         },
         body: JSON.stringify({
           ...data, 
-          dailySections: lesson.dailySections.map(section => ({
-            id: section.id,
-            day: section.day,
-            content: section.content,
-            bibleTexts: section.bibleTexts,
-            order: section.order
-          }))
+          dailySections
         })
       })
 
@@ -242,7 +255,9 @@ export default function LessonForm({ initialData, isEditing = false }: LessonFor
     }
   }
   
-  const handleDailySectionChange = (field: string, value: string | number) => {
+  const handleDailySectionChange = (field: keyof DailySection, value: string | number) => {
+    // For content and bibleTexts fields, we don't trim immediately to allow users to type spaces
+    // Trimming will happen when adding the section
     setDailySection(prev => ({ ...prev, [field]: value }))
   }
 
@@ -256,8 +271,12 @@ export default function LessonForm({ initialData, isEditing = false }: LessonFor
     // Add to sections with proper ordering
     const newSection: DailySection = {
       ...dailySection,
+      content: dailySection.content.trim(),
+      bibleTexts: dailySection.bibleTexts.trim(),
       order: lesson.dailySections.length,
-      id: isEditing ? undefined : Date.now().toString() // Temporary ID for new sections
+      // For new lessons, we don't need an ID since the backend will generate one
+      // For editing, we preserve the ID if it exists
+      id: dailySection.id
     }
 
     setLesson(prev => ({
@@ -270,7 +289,7 @@ export default function LessonForm({ initialData, isEditing = false }: LessonFor
       day: 'Sunday',
       content: '',
       bibleTexts: '',
-      order: lesson.dailySections.length + 1
+      order: 0
     })
     
     setError(null)
@@ -279,7 +298,9 @@ export default function LessonForm({ initialData, isEditing = false }: LessonFor
   const removeDailySection = (index: number) => {
     setLesson(prev => ({
       ...prev,
-      dailySections: prev.dailySections.filter((_, i) => i !== index)
+      dailySections: prev.dailySections
+        .filter((_, i) => i !== index)
+        .map((section, i) => ({ ...section, order: i }))
     }))
   }
 
@@ -291,7 +312,7 @@ export default function LessonForm({ initialData, isEditing = false }: LessonFor
       } else if (direction === 'down' && index < newSections.length - 1) {
         [newSections[index], newSections[index + 1]] = [newSections[index + 1], newSections[index]]
       }
-      // Update order values
+      // Update order values to maintain sequential numbering
       return {
         ...prev,
         dailySections: newSections.map((section, i) => ({ ...section, order: i }))
@@ -375,7 +396,7 @@ export default function LessonForm({ initialData, isEditing = false }: LessonFor
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div className={singleColumn ? "grid grid-cols-1 gap-8" : "grid grid-cols-1 lg:grid-cols-2 gap-8"}>
       {/* Error Message */}
       {error && (
         <div className="col-span-full p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
@@ -464,7 +485,7 @@ export default function LessonForm({ initialData, isEditing = false }: LessonFor
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
           >
             <option value="">Select a language</option>
-            {languages.map((lang) => (
+            {Array.isArray(languages) && languages.map((lang) => (
               <option key={lang.id} value={lang.id}>
                 {lang.flag} {lang.name}
               </option>
@@ -571,7 +592,7 @@ export default function LessonForm({ initialData, isEditing = false }: LessonFor
               <div className="space-y-4">
                 {lesson.dailySections.map((section, index) => (
                   <div 
-                    key={section.id || index} 
+                    key={section.id || `section-${index}`} 
                     className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-700/50"
                   >
                     <div className="flex justify-between items-start mb-3">
@@ -623,7 +644,7 @@ export default function LessonForm({ initialData, isEditing = false }: LessonFor
                     </div>
                     
                     <div className="text-gray-700 dark:text-gray-300 text-sm">
-                      {section.content}
+                      {section.content.substring(0, 100)}{section.content.length > 100 ? '...' : ''}
                     </div>
                   </div>
                 ))}
@@ -661,18 +682,6 @@ export default function LessonForm({ initialData, isEditing = false }: LessonFor
           </Button>
         </div>
       </form>
-
-      {/* JSON Preview */}
-      <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2 mb-4">
-          JSON Preview
-        </h2>
-        <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 overflow-auto max-h-[calc(100vh-200px)]">
-          <pre className="text-sm text-gray-800 dark:text-gray-200">
-            {JSON.stringify(previewData, null, 2)}
-          </pre>
-        </div>
-      </div>
     </div>
   )
 }
