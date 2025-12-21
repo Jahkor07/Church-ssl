@@ -352,38 +352,38 @@ export default function LessonForm({ initialData, isEditing = false, singleColum
     if (!editor) return null
 
     return (
-      <div className="border border-gray-300 rounded-md">
-        <div className="border-b border-gray-300 p-2 flex space-x-1">
+      <div className="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
+        <div className="border-b border-gray-300 dark:border-gray-600 p-2 flex space-x-1 bg-gray-50 dark:bg-gray-700">
           <button
             type="button"
             onClick={() => editor.chain().focus().toggleBold().run()}
-            className={`px-2 py-1 text-sm rounded ${
-              editor.isActive('bold') ? 'bg-gray-200' : 'hover:bg-gray-100'
+            className={`px-3 py-1 text-sm rounded ${
+              editor.isActive('bold') ? 'bg-gray-200 dark:bg-gray-600' : 'hover:bg-gray-100 dark:hover:bg-gray-600'
             }`}
           >
-            Bold
+            <strong>B</strong>
           </button>
           <button
             type="button"
             onClick={() => editor.chain().focus().toggleItalic().run()}
-            className={`px-2 py-1 text-sm rounded ${
-              editor.isActive('italic') ? 'bg-gray-200' : 'hover:bg-gray-100'
+            className={`px-3 py-1 text-sm rounded ${
+              editor.isActive('italic') ? 'bg-gray-200 dark:bg-gray-600' : 'hover:bg-gray-100 dark:hover:bg-gray-600'
             }`}
           >
-            Italic
+            <em>I</em>
           </button>
           <button
             type="button"
             onClick={() => editor.chain().focus().toggleBulletList().run()}
-            className={`px-2 py-1 text-sm rounded ${
-              editor.isActive('bulletList') ? 'bg-gray-200' : 'hover:bg-gray-100'
+            className={`px-3 py-1 text-sm rounded ${
+              editor.isActive('bulletList') ? 'bg-gray-200 dark:bg-gray-600' : 'hover:bg-gray-100 dark:hover:bg-gray-600'
             }`}
           >
-            List
+            • List
           </button>
         </div>
         <div
-          className="p-3 min-h-[200px] prose prose-sm max-w-none"
+          className="p-3 min-h-[200px] prose prose-sm max-w-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
           ref={(ref) => {
             if (ref && editor) {
               ref.innerHTML = ''
@@ -405,17 +405,17 @@ export default function LessonForm({ initialData, isEditing = false, singleColum
       )}
       
       {/* Form */}
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           <div>
-            <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Title *
             </label>
             <input
               type="text"
               id="title"
               {...register('title')}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
               placeholder="Enter lesson title"
             />
             {errors.title && (
@@ -424,7 +424,7 @@ export default function LessonForm({ initialData, isEditing = false, singleColum
           </div>
 
           <div>
-            <label htmlFor="year" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="year" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Year *
             </label>
             <input
@@ -433,7 +433,7 @@ export default function LessonForm({ initialData, isEditing = false, singleColum
               {...register('year', { valueAsNumber: true })}
               min="2020"
               max="2030"
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
             />
             {errors.year && (
               <p className="mt-1 text-sm text-red-600">{errors.year.message}</p>
@@ -443,14 +443,14 @@ export default function LessonForm({ initialData, isEditing = false, singleColum
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           <div>
-            <label htmlFor="quarter" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="quarter" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Quarter
             </label>
             <input
               type="text"
               id="quarter"
               {...register('quarter')}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
               placeholder="e.g., Q1, Spring"
             />
             {errors.quarter && (
@@ -459,14 +459,14 @@ export default function LessonForm({ initialData, isEditing = false, singleColum
           </div>
 
           <div>
-            <label htmlFor="keywords" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="keywords" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Keywords
             </label>
             <input
               type="text"
               id="keywords"
               {...register('keywords')}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
               placeholder="Enter keywords separated by commas"
             />
             {errors.keywords && (
@@ -476,17 +476,17 @@ export default function LessonForm({ initialData, isEditing = false, singleColum
         </div>
 
         <div>
-          <label htmlFor="languageId" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="languageId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Language *
           </label>
           <select
             id="languageId"
             {...register('languageId')}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
           >
-            <option value="">Select a language</option>
+            <option value="" className="dark:bg-gray-700">Select a language</option>
             {Array.isArray(languages) && languages.map((lang) => (
-              <option key={lang.id} value={lang.id}>
+              <option key={lang.id} value={lang.id} className="dark:bg-gray-700">
                 {lang.flag} {lang.name}
               </option>
             ))}
@@ -497,7 +497,7 @@ export default function LessonForm({ initialData, isEditing = false, singleColum
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Introduction
           </label>
           <RichTextEditor
@@ -513,18 +513,18 @@ export default function LessonForm({ initialData, isEditing = false, singleColum
         
         {/* Daily Sections */}
         <div className="col-span-full">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
               Daily Study Sections
             </h2>
-            <span className="text-sm text-gray-500">
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100">
               {lesson.dailySections.length} section{lesson.dailySections.length !== 1 ? 's' : ''} added
             </span>
           </div>
 
           {/* Add Daily Section Form */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 mb-6 shadow-sm">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               Add New Section
             </h3>
             
@@ -536,10 +536,10 @@ export default function LessonForm({ initialData, isEditing = false, singleColum
                 <select
                   value={dailySection.day}
                   onChange={(e) => handleDailySectionChange('day', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 >
                   {days.map(day => (
-                    <option key={day} value={day}>{day}</option>
+                    <option key={day} value={day} className="dark:bg-gray-700">{day}</option>
                   ))}
                 </select>
               </div>
@@ -552,7 +552,7 @@ export default function LessonForm({ initialData, isEditing = false, singleColum
                   type="text"
                   value={dailySection.bibleTexts}
                   onChange={(e) => handleDailySectionChange('bibleTexts', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white dark:placeholder-gray-400"
                   placeholder="e.g., Joshua 7:16-19, Romans 12:1-2"
                 />
               </div>
@@ -566,7 +566,7 @@ export default function LessonForm({ initialData, isEditing = false, singleColum
                 value={dailySection.content}
                 onChange={(e) => handleDailySectionChange('content', e.target.value)}
                 rows={4}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white dark:placeholder-gray-400"
                 placeholder="Enter the daily study content..."
               />
             </div>
@@ -575,7 +575,7 @@ export default function LessonForm({ initialData, isEditing = false, singleColum
               <button
                 type="button"
                 onClick={addDailySection}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200"
               >
                 <Plus size={18} /> Add Section
               </button>
@@ -584,8 +584,8 @@ export default function LessonForm({ initialData, isEditing = false, singleColum
           
           {/* Daily Sections List */}
           {lesson.dailySections.length > 0 && (
-            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                 Added Sections
               </h3>
               
@@ -593,7 +593,7 @@ export default function LessonForm({ initialData, isEditing = false, singleColum
                 {lesson.dailySections.map((section, index) => (
                   <div 
                     key={section.id || `section-${index}`} 
-                    className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-700/50"
+                    className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
                   >
                     <div className="flex justify-between items-start mb-3">
                       <div className="flex items-center gap-3">
@@ -612,10 +612,10 @@ export default function LessonForm({ initialData, isEditing = false, singleColum
                               type="button"
                               onClick={() => moveDailySection(index, 'up')}
                               disabled={index === 0}
-                              className={`p-1 rounded ${index === 0 ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'}`}
+                              className={`p-2 rounded-full ${index === 0 ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-600'}`}
                               title="Move up"
                             >
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                                 <path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd" />
                               </svg>
                             </button>
@@ -623,10 +623,10 @@ export default function LessonForm({ initialData, isEditing = false, singleColum
                               type="button"
                               onClick={() => moveDailySection(index, 'down')}
                               disabled={index === lesson.dailySections.length - 1}
-                              className={`p-1 rounded ${index === lesson.dailySections.length - 1 ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'}`}
+                              className={`p-2 rounded-full ${index === lesson.dailySections.length - 1 ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-600'}`}
                               title="Move down"
                             >
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                                 <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
                               </svg>
                             </button>
@@ -635,7 +635,7 @@ export default function LessonForm({ initialData, isEditing = false, singleColum
                         <button
                           type="button"
                           onClick={() => removeDailySection(index)}
-                          className="p-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 rounded"
+                          className="p-2 rounded-full text-red-600 hover:text-red-800 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20"
                           title="Remove section"
                         >
                           <Trash2 size={18} />
@@ -660,6 +660,7 @@ export default function LessonForm({ initialData, isEditing = false, singleColum
             variant="outline"
             onClick={() => router.push('/admin/lessons')}
             disabled={loading}
+            className="px-4 py-2 text-sm font-medium rounded-lg"
           >
             <X className="w-4 h-4 mr-2" />
             Cancel
@@ -667,6 +668,7 @@ export default function LessonForm({ initialData, isEditing = false, singleColum
           <Button
             type="submit"
             disabled={loading}
+            className="px-4 py-2 text-sm font-medium rounded-lg"
           >
             {loading ? (
               <>
