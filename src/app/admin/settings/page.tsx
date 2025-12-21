@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTheme } from '@/contexts/ThemeContext'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { 
@@ -15,22 +16,13 @@ import {
 } from 'lucide-react'
 
 export default function AdminSettingsPage() {
-  const [darkMode, setDarkMode] = useState(false)
+  const { theme, setTheme } = useTheme()
   const [notifications, setNotifications] = useState(true)
   const [emailUpdates, setEmailUpdates] = useState(false)
   const router = useRouter()
 
-  // Load dark mode preference from localStorage on mount
-  useEffect(() => {
-    const savedDarkMode = localStorage.getItem('darkMode') === 'true'
-    setDarkMode(savedDarkMode)
-  }, [])
-
   const toggleDarkMode = () => {
-    const newDarkMode = !darkMode
-    setDarkMode(newDarkMode)
-    localStorage.setItem('darkMode', newDarkMode.toString())
-    document.documentElement.classList.toggle('dark')
+    setTheme(theme === 'dark' ? 'light' : 'dark')
   }
 
   const handleLogout = () => {
@@ -117,7 +109,7 @@ export default function AdminSettingsPage() {
                   onClick={toggleDarkMode}
                   className="flex items-center space-x-2"
                 >
-                  {darkMode ? (
+                  {theme === 'dark' ? (
                     <>
                       <Sun className="w-4 h-4" />
                       <span>Light</span>
