@@ -17,8 +17,8 @@ import {
   User,
   Calendar
 } from 'lucide-react'
-import ProtectedRoute from '@/components/ProtectedRoute'
 import { useTheme } from '@/contexts/ThemeContext'
+import Cookies from 'js-cookie'
 
 const navigation = [
   { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
@@ -37,23 +37,21 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
-  
+
   // Check if we're on the login page
   const isLoginPage = pathname === '/admin/login'
   // Check if we're on the main dashboard page
   const isDashboardPage = pathname === '/admin' || pathname === '/admin/' || pathname === '/admin/dashboard'
 
 
-
   // Handle logout
   const handleLogout = () => {
-    // Remove auth token and redirect to home page
-    localStorage.removeItem('admin-auth-token')
+    Cookies.remove('auth-token')
     router.push('/')
   }
 
   return (
-    <ProtectedRoute>
+    <>
       {/* Full screen container with flex centering similar to homepage */}
       <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden">
         {/* Background Image - only show on dashboard page */}
@@ -130,23 +128,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               </nav>
 
               {/* User info and logout */}
-              <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center">
-                      <User className="w-4 h-4 text-gray-700 dark:text-gray-300" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                        Admin User
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                        admin@churchssl.com
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                
+              <div className="p-4 border-t border-t-gray-200 dark:border-gray-700">
                 <Button
                   variant="outline"
                   size="sm"
@@ -210,6 +192,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           </main>
         </div>
       </div>
-    </ProtectedRoute>
+    </>
   )
 }

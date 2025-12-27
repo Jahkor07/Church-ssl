@@ -8,7 +8,7 @@ docker-compose up -d
 
 echo.
 echo 2. Waiting for database to start...
-timeout /t 10 /nobreak >nul
+ping -n 11 127.0.0.1 > nul
 
 echo.
 echo 3. Generating Prisma client...

@@ -1,14 +1,16 @@
-import { PrismaClient } from '@prisma/client'
+// This file is kept for compatibility but no longer used
+// All data operations now go through the API service in src/services/api.ts
 
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined
-}
+// Placeholder export to avoid breaking existing imports
+export const prisma = {
+  lesson: {},
+  language: {},
+  admin: {},
+  section: {},
+  notification: {}
+};
 
-export const prisma = globalForPrisma.prisma ?? new PrismaClient()
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
-
-
-
+// Type definitions for mock prisma client
+export type PrismaClientType = typeof prisma;
 
 

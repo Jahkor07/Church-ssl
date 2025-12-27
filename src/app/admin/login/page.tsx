@@ -1,61 +1,63 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
-import CONFIG from '@/lib/config'
+import { useState } from 'react'
 
 export default function AdminLoginPage() {
-  const [formData, setFormData] = useState({
-    username: '',
-    password: ''
-  })
-  const [isLoading, setIsLoading] = useState(false)
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
   const [error, setError] = useState('')
-  const router = useRouter()
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    setIsLoading(true)
     setError('')
-    
+
     try {
-      // Use configurable API base URL
-      const response = await fetch(`${CONFIG.API_BASE_URL}${CONFIG.ADMIN_LOGIN_ENDPOINT}`, {
+      // 1. Authenticate with the external backend
+      const authResponse = await fetch('https://church-ssl-backend.onrender.com/authenticate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          username: formData.username,
-          password: formData.password,
-        }),
+        body: JSON.stringify({ username, password }),
       })
 
-      const data = await response.json()
-      
-      if (response.ok) {
-        // Store auth token
-        localStorage.setItem('admin-auth-token', data.token)
-        // Redirect to dashboard
-        router.push('/admin/dashboard')
-      } else {
-        setError(data.error || 'Invalid username or password')
-        setIsLoading(false)
+      if (!authResponse.ok) {
+        const errorData = await authResponse.json()
+        setError(errorData.message || 'Login failed. Please check your credentials.')
+        return
       }
-    } catch (error) {
-      setError('Network error. Please try again.')
-      setIsLoading(false)
-    }
-  }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }))
+      const authData = await authResponse.json()
+      const token = authData.jwt
+
+      if (!token) {
+        setError('Login failed: No JWT token received.')
+        return
+      }
+
+      // 2. Use a local API route to set the cookie
+      const cookieResponse = await fetch('/api/auth/set-token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token }),
+      });
+
+      if (!cookieResponse.ok) {
+        throw new Error('Failed to set authentication cookie.');
+      }
+
+      // 3. Redirect to the dashboard
+      window.location.href = '/admin/dashboard'
+
+    } catch (err) {
+      setError('An error occurred during login. Please try again.')
+      console.error(err)
+    }
   }
 
   return (
@@ -94,6 +96,7 @@ export default function AdminLoginPage() {
         @media (min-width: 641px) and (max-width: 1024px) {
           .responsive-container {
             padding: 1.5rem;
+.
           }
           
           .responsive-text-large {
@@ -230,106 +233,32 @@ export default function AdminLoginPage() {
             </p>
           </div>
 
-          {/* Login Form */}
-          <form className="space-y-4 sm:space-y-5" onSubmit={handleSubmit}>
-            {error && (
-              <div className="rounded-lg bg-red-500/20 border border-red-400/30 p-3 optimized-backdrop">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <svg className="h-4 w-4 sm:h-5 sm:w-5 text-red-200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div className="ml-2 sm:ml-3">
-                    <h3 className="text-sm sm:text-base font-medium text-red-100">{error}</h3>
-                  </div>
-                </div>
-              </div>
-            )}
-            
+          <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label htmlFor="username" className="block text-sm sm:text-base font-medium text-white mb-1">
-                Username
-              </label>
               <input
-                id="username"
-                name="username"
                 type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Username"
                 required
-                value={formData.username}
-                onChange={handleChange}
-                className="w-full responsive-input bg-white/20 border border-white/30 rounded-lg sm:rounded-xl placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent text-white optimized-backdrop optimized-transition-fast"
-                placeholder="Enter your username"
+                className="w-full px-3 py-2 text-white bg-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 responsive-input"
               />
             </div>
-
             <div>
-              <label htmlFor="password" className="block text-sm sm:text-base font-medium text-white mb-1">
-                Password
-              </label>
               <input
-                id="password"
-                name="password"
                 type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
                 required
-                value={formData.password}
-                onChange={handleChange}
-                className="w-full responsive-input bg-white/20 border border-white/30 rounded-lg sm:rounded-xl placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent text-white optimized-backdrop optimized-transition-fast"
-                placeholder="Enter your password"
+                className="w-full px-3 py-2 text-white bg-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 responsive-input"
               />
             </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-3 w-3 sm:h-4 sm:w-4 text-blue-500 focus:ring-blue-400 border-white/30 rounded bg-white/20 optimized-transition"
-                />
-                <label htmlFor="remember-me" className="ml-2 block text-xs sm:text-sm text-white optimized-transition">
-                  Remember me
-                </label>
-              </div>
-
-              <div className="text-xs sm:text-sm">
-                <a href="#" className="font-medium text-blue-200 hover:text-blue-100 optimized-transition">
-                  Forgot your password?
-                </a>
-              </div>
-            </div>
-
-            <div>
-              <Button
-                type="submit"
-                disabled={isLoading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg sm:rounded-xl shadow-lg text-sm sm:text-base font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 optimized-transition"
-              >
-                {isLoading ? (
-                  <>
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 sm:h-5 sm:w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Signing in...
-                  </>
-                ) : (
-                  'Sign in'
-                )}
-              </Button>
-            </div>
+            {error && <p className="text-red-400 text-sm text-center">{error}</p>}
+            <Button type="submit" className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg sm:rounded-xl shadow-lg text-sm sm:text-base font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 optimized-transition">
+              Sign In
+            </Button>
           </form>
-
-          {/* Demo Credentials */}
-          <div className="p-3 bg-blue-500/20 rounded-lg sm:rounded-xl border border-blue-400/30 optimized-backdrop">
-            <h3 className="text-sm sm:text-base font-medium text-blue-100 mb-1">
-              Demo Credentials
-            </h3>
-            <p className="text-xs sm:text-sm text-blue-50">
-              Username: <code className="bg-blue-400/30 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded text-white">admin</code><br/>
-              Password: <code className="bg-blue-400/30 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded text-white">password</code>
-            </p>
-          </div>
 
           {/* Back to Home */}
           <div className="text-center pt-2">

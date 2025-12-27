@@ -7,14 +7,7 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  // Enable Turbopack optimizations
-  turbopack: {
-    resolveAlias: {
-      "@/components": "./src/components",
-      "@/lib": "./src/lib",
-      "@/app": "./src/app",
-    },
-  },
+
   // Optimize webpack for faster builds
   webpack: (config, { dev, isServer }) => {
     // Reduce bundle size by excluding unnecessary modules
