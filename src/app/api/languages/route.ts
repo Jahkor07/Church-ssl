@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getAuth } from '@clerk/nextjs/server';
+
 import { type NextRequest } from 'next/server';
 
 // GET /api/languages - Get all active languages
@@ -28,12 +28,7 @@ export async function GET() {
 // PUT /api/languages/:id - Update a language (toggle active status)
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const { userId } = getAuth(req);
-    
-    // Check if user is authenticated
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+
 
     const { id } = params;
     const body = await req.json();

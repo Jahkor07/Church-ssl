@@ -3,17 +3,25 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Save, X, Upload as UploadIcon, Plus, Trash2 } from 'lucide-react'
+import { ArrowLeft, Save, X, Plus, Trash2 } from 'lucide-react'
+import { API_BASE_URL } from '@/lib/config'
+
+function getQuarter(date: Date) {
+    const month = date.getMonth() + 1; // getMonth() is 0-indexed
+    if (month >= 1 && month <= 3) return 'Q1';
+    if (month >= 4 && month <= 6) return 'Q2';
+    if (month >= 7 && month <= 9) return 'Q3';
+    if (month >= 10 && month <= 12) return 'Q4';
+    return ''; // Should not happen with valid date
+}
 
 export default function UploadLessonPage() {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    scriptureReference: '',
     lessonDate: '',
-    category: 'Sunday',
-    file: null as File | null,
-    fileName: ''
+    keywords: '',
+    languageId: ''
   })
   
   const [lesson, setLesson] = useState({
@@ -29,8 +37,25 @@ export default function UploadLessonPage() {
   const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
   
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
-  const router = useRouter()
+  const [languages, setLanguages] = useState<{ languageId: string; languageName: string }[]>([]);
+
+  useEffect(() => {
+    const fetchLanguages = async () => {
+      try {
+        const response = await fetch('/api/languages');
+        if (response.ok) {
+          const data = await response.json();
+          setLanguages(data);
+        } else {
+          console.error('Failed to fetch languages');
+        }
+      } catch (error) {
+        console.error('Error fetching languages:', error);
+      }
+    };
+
+    fetchLanguages();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -39,32 +64,11 @@ export default function UploadLessonPage() {
       [name]: value
     }))
   }
-  
+
   const handleDailySectionChange = (field: string, value: string) => {
     setDailySection(prev => ({ ...prev, [field]: value }))
   }
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0]
-      setFormData(prev => ({
-        ...prev,
-        file: file,
-        fileName: file.name
-      }))
-      
-      // Create preview for images
-      if (file.type.startsWith('image/')) {
-        const reader = new FileReader()
-        reader.onload = () => {
-          setPreviewUrl(reader.result as string)
-        }
-        reader.readAsDataURL(file)
-      } else {
-        setPreviewUrl(null)
-      }
-    }
-  }
   
   const addDailySection = () => {
     if (dailySection.day && dailySection.content && dailySection.bibleTexts) {
@@ -93,18 +97,62 @@ export default function UploadLessonPage() {
     setIsSubmitting(true)
     
     // Validate required fields
-    if (!formData.title || !formData.description || !formData.scriptureReference) {
-      alert('Please fill in all required fields')
+    if (!formData.title || !formData.description) {
+      alert('Please fill in all required fields: Title and Description')
       setIsSubmitting(false)
       return
     }
     
-    // Mock submit - simulate API call
-    setTimeout(() => {
-      console.log('Lesson submitted:', { ...formData, ...lesson })
-      setIsSubmitting(false)
-      router.push('/admin/lessons')
-    }, 2000)
+    let lessonYear: number | undefined;
+    let lessonQuarter: string = '';
+
+    if (formData.lessonDate) {
+        const date = new Date(formData.lessonDate);
+        if (!isNaN(date.getTime())) { // Check if date is valid
+            lessonYear = date.getFullYear();
+            lessonQuarter = getQuarter(date);
+        }
+    }
+
+    const lessonPayload = {
+      title: formData.title,
+      introduction: formData.description,
+      year: lessonYear,
+      quarter: lessonQuarter,
+      language: {
+        languageId: formData.languageId
+      },
+      dailySections: lesson.dailySections.map(ds => ({
+        day: ds.day,
+        content: ds.content,
+        bibleTexts: ds.bibleTexts
+      })),
+      keywords: formData.keywords
+    };
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/lessons/lesson`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('admin-auth-token')}`
+        },
+        body: JSON.stringify(lessonPayload),
+      });
+
+      if (response.ok) {
+        alert('Lesson created successfully!');
+        router.push('/admin/lessons');
+      } else {
+        const errorData = await response.json();
+        alert(`Error: ${errorData.message || response.statusText}`);
+      }
+    } catch (error) {
+      console.error('Network error or unexpected issue:', error);
+      alert('An error occurred while creating the lesson. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   const handleCancel = () => {
@@ -176,22 +224,7 @@ export default function UploadLessonPage() {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label htmlFor="scriptureReference" className="block text-sm font-medium text-gray-700 mb-2">
-                        Scripture Reference *
-                      </label>
-                      <input
-                        type="text"
-                        id="scriptureReference"
-                        name="scriptureReference"
-                        required
-                        value={formData.scriptureReference}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2 sm:px-4 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="e.g., John 3:16-21"
-                      />
-                    </div>
-
+                    
                     <div>
                       <label htmlFor="lessonDate" className="block text-sm font-medium text-gray-700 mb-2">
                         Lesson Date
@@ -208,23 +241,41 @@ export default function UploadLessonPage() {
                   </div>
 
                   <div>
-                    <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
-                      Category
+                    <label htmlFor="keywords" className="block text-sm font-medium text-gray-700 mb-2">
+                      Keywords
+                    </label>
+                    <input
+                      type="text"
+                      id="keywords"
+                      name="keywords"
+                      value={formData.keywords}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 sm:px-4 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="e.g., faith, grace, salvation"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="languageId" className="block text-sm font-medium text-gray-700 mb-2">
+                      Language
                     </label>
                     <select
-                      id="category"
-                      name="category"
-                      value={formData.category}
+                      id="languageId"
+                      name="languageId"
+                      value={formData.languageId}
                       onChange={handleChange}
                       className="w-full px-3 py-2 sm:px-4 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
-                      <option value="Sunday">Sunday School</option>
-                      <option value="Midweek">Midweek Service</option>
-                      <option value="Youth">Youth Ministry</option>
-                      <option value="Children">Children's Ministry</option>
-                      <option value="Special">Special Event</option>
+                      <option value="">Select Language</option>
+                      {languages.map(lang => (
+                        <option key={lang.languageId} value={lang.languageId}>
+                          {lang.languageName}
+                        </option>
+                      ))}
                     </select>
                   </div>
+
+
                 </div>
               </div>
               
@@ -315,51 +366,7 @@ export default function UploadLessonPage() {
                 )}
               </div>
 
-              {/* File Upload */}
-              <div className="space-y-6">
-                <h2 className="text-xl font-semibold text-gray-900 border-b border-gray-200 pb-2">
-                  Attachment
-                </h2>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Upload PDF or Image
-                  </label>
-                  <div className="flex items-center justify-center w-full">
-                    <label className="flex flex-col items-center justify-center w-full h-40 sm:h-48 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
-                      <div className="flex flex-col items-center justify-center pt-4 sm:pt-5 pb-4 sm:pb-6">
-                        <UploadIcon className="w-6 h-6 sm:w-8 sm:h-8 mb-3 sm:mb-4 text-gray-500" />
-                        <p className="mb-1 sm:mb-2 text-sm text-gray-500">
-                          <span className="font-semibold">Click to upload</span> or drag and drop
-                        </p>
-                        <p className="text-xs text-gray-500 px-2 text-center">
-                          PDF, PNG, JPG, GIF (MAX. 10MB)
-                        </p>
-                      </div>
-                      <input 
-                        type="file" 
-                        className="hidden" 
-                        accept=".pdf,.png,.jpg,.jpeg,.gif"
-                        onChange={handleFileChange}
-                      />
-                    </label>
-                  </div>
-                  {formData.fileName && (
-                    <div className="mt-2 text-sm text-gray-600">
-                      Selected file: {formData.fileName}
-                    </div>
-                  )}
-                  {previewUrl && (
-                    <div className="mt-4">
-                      <img 
-                        src={previewUrl} 
-                        alt="Preview" 
-                        className="max-h-32 sm:max-h-40 rounded-lg border border-gray-200 w-full object-contain"
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
+
 
               {/* Form Actions */}
               <div className="flex flex-col sm:flex-row items-center justify-end space-y-3 sm:space-y-0 sm:space-x-4 pt-6 border-t border-gray-200">
@@ -409,18 +416,16 @@ export default function UploadLessonPage() {
               <h3 className="text-sm font-medium text-gray-500">Description</h3>
               <p className="text-gray-900">{formData.description || 'No description entered'}</p>
             </div>
-            <div>
-              <h3 className="text-sm font-medium text-gray-500">Scripture Reference</h3>
-              <p className="text-gray-900">{formData.scriptureReference || 'No scripture reference entered'}</p>
-            </div>
+
             <div>
               <h3 className="text-sm font-medium text-gray-500">Lesson Date</h3>
               <p className="text-gray-900">{formData.lessonDate || 'No date selected'}</p>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-gray-500">Category</h3>
-              <p className="text-gray-900">{formData.category}</p>
+              <h3 className="text-sm font-medium text-gray-500">Keywords</h3>
+              <p className="text-gray-900">{formData.keywords || 'No keywords entered'}</p>
             </div>
+
             <div>
               <h3 className="text-sm font-medium text-gray-500">Daily Sections</h3>
               <div className="mt-1 space-y-2">
@@ -438,10 +443,7 @@ export default function UploadLessonPage() {
                 )}
               </div>
             </div>
-            <div>
-              <h3 className="text-sm font-medium text-gray-500">Attachment</h3>
-              <p className="text-gray-900">{formData.fileName || 'No file uploaded'}</p>
-            </div>
+
           </div>
         </div>
       </div>

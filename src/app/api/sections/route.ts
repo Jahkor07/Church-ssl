@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getAuth } from '@clerk/nextjs/server';
+
 import { type NextRequest } from 'next/server';
 
 // POST /api/sections - Create a new section (flat endpoint)

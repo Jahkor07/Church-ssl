@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
+import { API_BASE_URL } from '@/lib/config'
 
 export default function AdminLoginPage() {
   const [formData, setFormData] = useState({
@@ -21,8 +22,8 @@ export default function AdminLoginPage() {
     setError('')
     
     try {
-      // Connect to Next.js backend on port 3000
-      const response = await fetch('/api/admin/login', {
+      // Connect directly to the backend authentication endpoint
+      const response = await fetch(`${API_BASE_URL}/authenticate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
