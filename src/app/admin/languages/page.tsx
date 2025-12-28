@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { languageService } from '@/services/api/languageService'
 
 interface Language {
   id: string
@@ -24,8 +25,7 @@ export default function LanguagesPage() {
   const fetchLanguages = async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/languages')
-      const data = await response.json()
+      const data = await languageService.getAllLanguages()
       setLanguages(data)
     } catch (error) {
       console.error('Error fetching languages:', error)
@@ -36,23 +36,18 @@ export default function LanguagesPage() {
 
   const toggleActive = async (language: Language) => {
     try {
-      const response = await fetch(`/api/languages/${language.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          isActive: !language.isActive
-        })
-      })
-
-      if (response.ok) {
-        setLanguages(languages.map(l => 
-          l.id === language.id 
-            ? { ...l, isActive: !l.isActive }
-            : l
-        ))
-      }
+      // Toggle the active status in the service
+      const updatedLanguage = await languageService.updateLanguage(language.id, {
+        ...language,
+        isActive: !language.isActive
+      });
+      
+      // Update the local state
+      setLanguages(languages.map(l => 
+        l.id === language.id 
+          ? { ...l, isActive: !l.isActive }
+          : l
+      ));
     } catch (error) {
       console.error('Error updating language:', error)
     }
