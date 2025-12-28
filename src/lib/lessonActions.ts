@@ -3,7 +3,7 @@
 // Fetch lessons by quarter
 export async function fetchLessonsByQuarter(year: number, quarter: string) {
   try {
-    const response = await fetch(`/api/lessons/by-quarter?year=${year}&quarter=${quarter}`);
+    const response = await fetch(`https://church-ssl-backend.onrender.com/api/lessons/lesson?year=${year}&quarter=${quarter}`);
     
     // Check if response is JSON
     const contentType = response.headers.get('content-type');
@@ -12,19 +12,37 @@ export async function fetchLessonsByQuarter(year: number, quarter: string) {
     }
     
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to fetch lessons');
+      const errorText = await response.text();
+      console.error('API Error:', response.status, response.statusText, errorText);
+      throw new Error(`Failed to fetch lessons: ${response.status} ${response.statusText}. Details: ${errorText}`);
     }
     
     const data = await response.json();
-    return data.data || data; // Handle both response formats
+    
+    // Transform the data to match the expected format in the frontend
+    // The external API returns different field names
+    const transformedData = Array.isArray(data) ? data.map(lesson => ({
+      id: lesson.lessonId,
+      lessonId: lesson.lessonId,
+      title: lesson.title,
+      year: lesson.year,
+      quarter: lesson.quarter,
+      introduction: lesson.introduction,
+      keywords: lesson.keywords,
+      language: lesson.language,
+      dailySections: lesson.dailySections,
+      description: lesson.introduction?.substring(0, 100) + '...', // Create a description from introduction
+      sections: lesson.dailySections || [], // Map daily sections to sections for compatibility
+      isPublished: true, // Default to true for display purposes
+    })) : [];
+    
+    return transformedData;
   } catch (error: any) {
     console.error('Error fetching lessons by quarter:', error);
     
-    // If it's a network error (likely database connection issue), rethrow with specific message
+    // If it's a network error, provide more context
     if (error instanceof TypeError && error.message.includes('fetch')) {
-      // Network error - likely database connection issue
-      throw new Error('DATABASE_CONNECTION_ERROR');
+      throw new Error('NETWORK_ERROR: Unable to connect to the lesson API. Please check your internet connection and try again.');
     }
     
     throw error;

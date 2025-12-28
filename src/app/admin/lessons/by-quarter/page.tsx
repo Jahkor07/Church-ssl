@@ -2,22 +2,22 @@
 
 import { useState, useEffect, memo, useCallback } from 'react';
 import AdminLayout from '@/components/AdminLayout';
-import { fetchLessonsByQuarter } from '@/lib/lessonActions';
+import { lessonService } from '@/services/api/lessonService';
 
 // Memoized lesson card component for performance
 const LessonCard = memo(({ lesson }: { lesson: any }) => (
   <div 
-    key={lesson.id} 
+    key={lesson.lessonId || lesson.id} 
     className="border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm p-5 hover:shadow-md transition-all duration-200 bg-white dark:bg-gray-800"
   >
     <h3 className="font-semibold text-lg text-gray-900 dark:text-white mb-2">
       {lesson.title}
     </h3>
     <p className="text-gray-600 dark:text-gray-300 text-sm mb-3">
-      {lesson.description || 'No description available'}
+      {lesson.description || lesson.introduction?.substring(0, 100) + '...' || 'No description available'}
     </p>
     <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
-      <span>Language: {lesson.language?.name || 'Unknown'}</span>
+      <span>Language: {lesson.language?.languageName || lesson.language?.name || 'Unknown'}</span>
       <span>
         {lesson.isPublished ? (
           <span className="text-green-600 dark:text-green-400">Published</span>
@@ -28,7 +28,7 @@ const LessonCard = memo(({ lesson }: { lesson: any }) => (
     </div>
     <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-200">
-        {lesson.sections?.length || 0} sections
+        {lesson.dailySections?.length || lesson.sections?.length || 0} sections
       </span>
     </div>
   </div>
@@ -48,8 +48,8 @@ export default function LessonsByQuarterPage() {
       setLoading(true);
       setError(null);
       
-      // Convert year to number and fetch lessons using the function
-      const lessonsData = await fetchLessonsByQuarter(parseInt(year), quarter);
+      // Convert year to number and fetch lessons using the service function
+      const lessonsData = await lessonService.getLessonsByQuarter(parseInt(year), quarter);
       setLessons(lessonsData);
       
       // Check if we received an empty array

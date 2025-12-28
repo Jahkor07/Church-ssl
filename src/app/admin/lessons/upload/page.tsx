@@ -19,7 +19,7 @@ export default function UploadLessonPage() {
       <div className="max-w-7xl mx-auto bg-white dark:bg-gray-800 shadow-xl rounded-xl overflow-hidden">
         <div className="px-4 py-5 sm:p-8">
           <div className="max-w-4xl mx-auto w-full">
-            <LessonForm singleColumn={true} />
+            <LessonForm />
           </div>
         </div>
       </div>

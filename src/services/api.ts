@@ -1,6 +1,9 @@
 // API service layer for frontend-only architecture
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
 
+// External API base URL for lesson-related operations
+const EXTERNAL_API_BASE_URL = 'https://church-ssl-backend.onrender.com/api';
+
 // Helper function to make API requests
 const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
   const url = endpoint.startsWith('/api') ? endpoint : `${API_BASE_URL}${endpoint}`;
@@ -116,154 +119,153 @@ const mockData = {
 
 // Dashboard API functions
 export const getDashboardData = async () => {
-  // In a real app, this would be: return await apiRequest('/dashboard');
-  // For now, return mock data
-  return new Promise((resolve) => {
-    setTimeout(() => resolve(mockData.dashboard), 300); // Simulate network delay
-  });
+  // Dashboard data would typically come from a dedicated endpoint
+  // For now, construct from other API calls or return mock data
+  try {
+    // Attempt to fetch from external API if available
+    return await apiRequest(`${EXTERNAL_API_BASE_URL}/dashboard`);
+  } catch (error) {
+    console.error('Error fetching dashboard data:', error);
+    // Fallback to mock data
+    return new Promise((resolve) => {
+      setTimeout(() => resolve(mockData.dashboard), 300); // Simulate network delay
+    });
+  }
 };
 
 // Lessons API functions
 export const getLessons = async (filters?: { year?: number; quarter?: string; languageId?: string }) => {
-  // In a real app, this would be: return await apiRequest(`/lessons?${new URLSearchParams(filters).toString()}`);
-  // For now, return mock data
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      let lessons = [...mockData.lessons];
-      
-      if (filters) {
-        if (filters.year) {
-          lessons = lessons.filter(lesson => lesson.year === filters.year);
-        }
-        if (filters.quarter) {
-          lessons = lessons.filter(lesson => lesson.quarter === filters.quarter);
-        }
-        if (filters.languageId) {
-          lessons = lessons.filter(lesson => lesson.language.languageId === filters.languageId);
-        }
-      }
-      
-      resolve(lessons);
-    }, 300); // Simulate network delay
-  });
+  const queryParams = new URLSearchParams();
+  
+  if (filters?.year !== undefined) queryParams.append('year', filters.year.toString());
+  if (filters?.quarter) queryParams.append('quarter', filters.quarter);
+  if (filters?.languageId !== undefined) queryParams.append('languageId', filters.languageId);
+  
+  const queryString = queryParams.toString();
+  const endpoint = `${EXTERNAL_API_BASE_URL}/lessons/lesson${queryString ? `?${queryString}` : ''}`;
+  
+  return await apiRequest(endpoint);
 };
 
 export const getLessonById = async (id: string) => {
-  // In a real app, this would be: return await apiRequest(`/lessons/${id}`);
-  // For now, return mock data
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const lesson = mockData.lessons.find(lesson => lesson.lessonId === id);
-      resolve(lesson || null);
-    }, 300); // Simulate network delay
-  });
+  return await apiRequest(`${EXTERNAL_API_BASE_URL}/lessons/lesson/${id}`);
 };
 
 export const createLesson = async (lessonData: any) => {
-  // In a real app, this would be: return await apiRequest('/lessons', { method: 'POST', body: JSON.stringify(lessonData) });
-  // For now, return mock data
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const newLesson = {
-        lessonId: `lesson-${Date.now()}`,
-        ...lessonData,
-        sections: lessonData.sections || []
-      };
-      mockData.lessons.push(newLesson);
-      resolve(newLesson);
-    }, 300); // Simulate network delay
+  const transformedLessonData = {
+    title: lessonData.title,
+    year: lessonData.year,
+    quarter: lessonData.quarter,
+    introduction: lessonData.introduction,
+    keywords: lessonData.keywords,
+    language: {
+      languageId: lessonData.languageId,
+    },
+    dailySections: lessonData.dailySections.map((section: any) => ({
+      day: section.day,
+      content: section.content,
+      bibleTexts: section.bibleTexts,
+    })),
+  };
+
+  return await apiRequest(`${EXTERNAL_API_BASE_URL}/lessons/lesson`, {
+    method: 'POST',
+    body: JSON.stringify(transformedLessonData),
+    // Ensure 'Content-Type' is 'application/json' if not already set by apiRequest
+    headers: {
+      'Content-Type': 'application/json',
+    },
   });
 };
 
 export const updateLesson = async (id: string, lessonData: any) => {
-  // In a real app, this would be: return await apiRequest(`/lessons/${id}`, { method: 'PUT', body: JSON.stringify(lessonData) });
-  // For now, return mock data
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const index = mockData.lessons.findIndex(lesson => lesson.lessonId === id);
-      if (index !== -1) {
-        mockData.lessons[index] = { ...mockData.lessons[index], ...lessonData };
-        resolve(mockData.lessons[index]);
-      } else {
-        resolve(null);
-      }
-    }, 300); // Simulate network delay
+  const transformedLessonData = {
+    lessonId: id,
+    title: lessonData.title,
+    year: lessonData.year,
+    quarter: lessonData.quarter,
+    introduction: lessonData.introduction,
+    keywords: lessonData.keywords,
+    language: {
+      languageId: lessonData.languageId,
+    },
+    dailySections: lessonData.dailySections?.map((section: any) => ({
+      day: section.day,
+      content: section.content,
+      bibleTexts: section.bibleTexts,
+    })) || [],
+  };
+
+  return await apiRequest(`${EXTERNAL_API_BASE_URL}/lessons/lesson`, {
+    method: 'PUT',
+    body: JSON.stringify(transformedLessonData),
+    headers: {
+      'Content-Type': 'application/json',
+    },
   });
 };
 
 export const deleteLesson = async (id: string) => {
-  // In a real app, this would be: return await apiRequest(`/lessons/${id}`, { method: 'DELETE' });
-  // For now, return mock data
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const index = mockData.lessons.findIndex(lesson => lesson.lessonId === id);
-      if (index !== -1) {
-        mockData.lessons.splice(index, 1);
-        resolve({ message: 'Lesson deleted successfully' });
-      } else {
-        resolve({ message: 'Lesson not found' });
-      }
-    }, 300); // Simulate network delay
+  return await apiRequest(`${EXTERNAL_API_BASE_URL}/lessons/lesson/${id}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    },
   });
 };
 
 // Languages API functions
 export const getLanguages = async () => {
-  // In a real app, this would be: return await apiRequest('/languages');
-  // For now, return mock data
-  return new Promise((resolve) => {
-    setTimeout(() => resolve(mockData.languages), 300); // Simulate network delay
-  });
+  try {
+    // Attempt to fetch from external API
+    return await apiRequest(`${EXTERNAL_API_BASE_URL}/languages`);
+  } catch (error) {
+    console.error('Error fetching languages:', error);
+    // Fallback to mock data
+    return new Promise((resolve) => {
+      setTimeout(() => resolve(mockData.languages), 300); // Simulate network delay
+    });
+  }
 };
 
 // Notifications API functions
 export const getNotifications = async () => {
-  // In a real app, this would be: return await apiRequest('/notifications');
-  // For now, return mock data
-  return new Promise((resolve) => {
-    setTimeout(() => resolve(mockData.notifications), 300); // Simulate network delay
-  });
+  try {
+    // Attempt to fetch from external API
+    return await apiRequest(`${EXTERNAL_API_BASE_URL}/notifications`);
+  } catch (error) {
+    console.error('Error fetching notifications:', error);
+    // Fallback to mock data
+    return new Promise((resolve) => {
+      setTimeout(() => resolve(mockData.notifications), 300); // Simulate network delay
+    });
+  }
 };
 
 export const markNotificationAsRead = async (id: string) => {
-  // In a real app, this would be: return await apiRequest(`/notifications/${id}/read`, { method: 'PUT' });
-  // For now, return mock data
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const notification = mockData.notifications.find(notif => notif.id === id);
-      if (notification) {
-        notification.read = true;
-      }
-      resolve(notification);
-    }, 300); // Simulate network delay
+  return await apiRequest(`${EXTERNAL_API_BASE_URL}/notifications/${id}/read`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
   });
 };
 
 // Users API functions
 export const getUsers = async () => {
-  // In a real app, this would be: return await apiRequest('/users');
-  // For now, return mock data
-  return new Promise((resolve) => {
-    setTimeout(() => resolve(mockData.users), 300); // Simulate network delay
-  });
+  try {
+    // Attempt to fetch from external API
+    return await apiRequest(`${EXTERNAL_API_BASE_URL}/users`);
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    // Fallback to mock data
+    return new Promise((resolve) => {
+      setTimeout(() => resolve(mockData.users), 300); // Simulate network delay
+    });
+  }
 };
 
 // Search API function
 export const searchLessons = async (query: string) => {
-  // In a real app, this would be: return await apiRequest(`/lessons/search?q=${encodeURIComponent(query)}`);
-  // For now, return mock data
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      if (!query) {
-        resolve(mockData.lessons);
-      } else {
-        const filtered = mockData.lessons.filter(lesson => 
-          lesson.title.toLowerCase().includes(query.toLowerCase()) ||
-          lesson.description.toLowerCase().includes(query.toLowerCase()) ||
-          lesson.keywords.toLowerCase().includes(query.toLowerCase())
-        );
-        resolve(filtered);
-      }
-    }, 300); // Simulate network delay
-  });
+  return await apiRequest(`${EXTERNAL_API_BASE_URL}/lessons/lesson/search?q=${encodeURIComponent(query)}`);
 };

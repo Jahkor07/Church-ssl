@@ -9,20 +9,27 @@ import { Editor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import { Plus, Trash2, X, Save } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import lessonService from '@/services/api/lessonService'
 import { useTheme } from '@/contexts/ThemeContext'
 
 const lessonSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   description: z.string().optional(),
   introduction: z.string().optional(),
-  content: z.string().min(1, 'Content is required'),
+  content: z.string().optional(), // Make content optional here, as it's primarily used in daily sections
   year: z.number().int().min(2020).max(2030),
   languageId: z.string().min(1, 'Language is required'),
   isPublished: z.boolean().default(false).optional(),
   order: z.number().int().default(0).optional(),
   quarter: z.string().optional(),
-  keywords: z.string().optional()
+  keywords: z.string().optional(),
+  dailySections: z.array(z.object({
+    day: z.string().min(1, 'Day is required'),
+    content: z.string().min(1, 'Content is required'),
+    bibleTexts: z.string().min(1, 'Bible texts are required'),
+    order: z.number().int().optional(),
+    id: z.string().optional()
+  })).optional()
 })
 
 type LessonFormData = z.infer<typeof lessonSchema>
@@ -224,43 +231,39 @@ export default function LessonForm({ initialData, isEditing = false, singleColum
     setLoading(true)
     setError(null)
     try {
-      // Use Next.js API routes
-      const url = isEditing ? `/api/lessons/${initialData?.id}` : '/api/lessons'
-      const method = isEditing ? 'PUT' : 'POST'
+      // Prepare lesson data for the service call
+      const lessonDataToSend = {
+        ...data,
+        dailySections: lesson.dailySections
+          .filter(section => section.day && section.content.trim() && section.bibleTexts.trim())
+          .map(section => ({
+            day: section.day,
+            content: section.content.trim(),
+            bibleTexts: section.bibleTexts.trim(),
+            // Only include ID if it's an existing section being updated
+            ...(section.id && { id: section.id }),
+          })),
+        // The service expects 'languageId' directly, not a nested 'language' object for submission
+      };
 
-      // Prepare daily sections for submission
-      // Filter out any sections without required content
-      const dailySections = lesson.dailySections
-        .filter(section => section.day && section.content.trim() && section.bibleTexts.trim())
-        .map(section => ({
-          id: section.id,
-          day: section.day,
-          content: section.content,
-          bibleTexts: section.bibleTexts,
-          order: section.order
-        }))
+      let result;
+      if (isEditing && initialData?.id) {
+        // Call the update service
+        result = await lessonService.updateLesson(initialData.id, lessonDataToSend);
+      } else {
+        // Call the create service
+        result = await lessonService.createLesson(lessonDataToSend);
+      }
 
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...data, 
-          dailySections
-        })
-      })
-
-      if (response.ok) {
+      if (result) {
         router.push('/admin/lessons')
       } else {
-        const error = await response.json()
-        setError(error.error || 'Failed to save lesson')
-        console.error('Error saving lesson:', error)
+        setError('Failed to save lesson: No data returned from API.');
+        console.error('API did not return data:', result);
       }
-    } catch (error) {
-      setError('Network error. Please try again.')
-      console.error('Error saving lesson:', error)
+    } catch (error: any) {
+      setError(error.message || 'Network error. Please try again.');
+      console.error('Error saving lesson:', error);
     } finally {
       setLoading(false)
     }
