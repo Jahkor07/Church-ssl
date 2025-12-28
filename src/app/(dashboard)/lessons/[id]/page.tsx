@@ -3,65 +3,50 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Bookmark, Share2, Download, StickyNote } from 'lucide-react'
-
-// Mock lesson data
-const mockLesson = {
-  id: '1',
-  title: 'The Beginning of the Gospel',
-  subtitle: 'Understanding the foundation of our faith',
-  date: '2024-01-06',
-  quarter: 'Q1 2024',
-  week: 'Week 1',
-  content: `
-    <h2>Introduction</h2>
-    <p>Welcome to our study of the Gospel of Mark. This quarter, we will explore the foundational truths that form the bedrock of our Christian faith. The Gospel of Mark, believed to be the earliest written Gospel, presents Jesus Christ as the Son of God and the Savior of the world.</p>
-    
-    <h3>The Opening Declaration</h3>
-    <p>Mark begins his Gospel with a powerful declaration: "The beginning of the gospel of Jesus Christ, the Son of God" (Mark 1:1). This opening statement sets the tone for everything that follows. The word "gospel" means "good news," and Mark is about to share the greatest news the world has ever heard.</p>
-    
-    <h3>Key Themes</h3>
-    <p>Throughout our study, we will encounter several key themes:</p>
-    <ul>
-      <li><strong>Jesus as the Messiah:</strong> Mark presents Jesus as the long-awaited Messiah, fulfilling Old Testament prophecies.</li>
-      <li><strong>The Kingdom of God:</strong> Jesus came to establish God's kingdom on earth.</li>
-      <li><strong>Discipleship:</strong> Following Jesus requires commitment and sacrifice.</li>
-      <li><strong>Faith and Action:</strong> True faith is demonstrated through our actions.</li>
-    </ul>
-    
-    <h3>Practical Application</h3>
-    <p>As we study this Gospel, let us ask ourselves: How does this message of hope and salvation impact our daily lives? How can we share this good news with others? The Gospel is not just a historical account; it is a living message that transforms lives today.</p>
-    
-    <h3>Memory Verse</h3>
-    <blockquote>
-      <p>"The beginning of the gospel of Jesus Christ, the Son of God." - Mark 1:1</p>
-    </blockquote>
-    
-    <h3>Discussion Questions</h3>
-    <ol>
-      <li>What does the word "gospel" mean to you personally?</li>
-      <li>How has the good news of Jesus Christ changed your life?</li>
-      <li>What are some ways you can share this good news with others?</li>
-    </ol>
-  `,
-  notes: ''
-}
+import { lessonService } from '@/services/api/lessonService'
 
 export default function LessonDetailPage({ params }: { params: { id: string } }) {
-  const [notes, setNotes] = useState('')
-  const [showNotes, setShowNotes] = useState(false)
-  const [selectedText, setSelectedText] = useState('')
-
+  const [lesson, setLesson] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [notes, setNotes] = useState('');
+  const [showNotes, setShowNotes] = useState(false);
+  const [selectedText, setSelectedText] = useState('');
+  
+  useEffect(() => {
+    const fetchLesson = async () => {
+      try {
+        setLoading(true);
+        const lessonData = await lessonService.getLessonById(params.id);
+        setLesson(lessonData);
+      } catch (err) {
+        console.error('Error fetching lesson:', err);
+        setError('Failed to load lesson');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchLesson();
+  }, [params.id]);
+  
   useEffect(() => {
     // Load notes from localStorage
-    const savedNotes = localStorage.getItem(`lesson-${params.id}-notes`)
-    if (savedNotes) {
-      setNotes(savedNotes)
+    if (lesson) {
+      const savedNotes = localStorage.getItem(`lesson-${lesson.id}-notes`);
+      if (savedNotes) {
+        setNotes(savedNotes);
+      }
     }
-  }, [params.id])
+  }, [lesson]);
+  // Remove duplicate state declarations - they're already defined above
 
+  
   const saveNotes = (newNotes: string) => {
     setNotes(newNotes)
-    localStorage.setItem(`lesson-${params.id}-notes`, newNotes)
+    if (lesson) {
+      localStorage.setItem(`lesson-${lesson.id}-notes`, newNotes)
+    }
   }
 
   const handleTextSelection = () => {
@@ -78,7 +63,29 @@ export default function LessonDetailPage({ params }: { params: { id: string } })
       setSelectedText('')
     }
   }
-
+  
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto py-12 flex justify-center items-center">
+        <div className="flex flex-col items-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">Loading lesson...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  if (error || !lesson) {
+    return (
+      <div className="max-w-7xl mx-auto py-12">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <strong className="font-bold">Error! </strong>
+          <span className="block sm:inline">{error || 'Lesson not found'}</span>
+        </div>
+      </div>
+    );
+  }
+  
   return (
     <div className="max-w-7xl mx-auto">
       {/* Header */}
@@ -91,17 +98,17 @@ export default function LessonDetailPage({ params }: { params: { id: string } })
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 mb-2">
-              <span>{mockLesson.quarter}</span>
+              <span>{lesson?.year} {lesson?.quarter}</span>
               <span>•</span>
-              <span>{mockLesson.week}</span>
+              <span>{lesson?.keywords}</span>
               <span>•</span>
-              <span>{new Date(mockLesson.date).toLocaleDateString()}</span>
+              <span>{lesson?.language?.languageName || 'Unknown'}</span>
             </div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              {mockLesson.title}
+              {lesson?.title}
             </h1>
             <p className="text-xl text-gray-600 dark:text-gray-400">
-              {mockLesson.subtitle}
+              {lesson?.introduction?.substring(0, 100)}{lesson?.introduction?.length > 100 ? '...' : ''}
             </p>
           </div>
           
@@ -129,7 +136,7 @@ export default function LessonDetailPage({ params }: { params: { id: string } })
             <div className="p-8">
               <div 
                 className="prose prose-lg max-w-none dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-strong:text-gray-900 dark:prose-strong:text-white prose-ul:text-gray-700 dark:prose-ul:text-gray-300 prose-ol:text-gray-700 dark:prose-ol:text-gray-300 prose-blockquote:border-blue-500 prose-blockquote:bg-blue-50 dark:prose-blockquote:bg-blue-900/20"
-                dangerouslySetInnerHTML={{ __html: mockLesson.content }}
+                dangerouslySetInnerHTML={{ __html: lesson?.introduction || '' }}
                 onMouseUp={handleTextSelection}
               />
             </div>

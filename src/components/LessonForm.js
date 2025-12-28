@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { lessonService } from '@/services/api/lessonService';
 
 export default function LessonForm({ onSuccess, initialData = null, singleColumn = false }) {
@@ -20,7 +20,49 @@ export default function LessonForm({ onSuccess, initialData = null, singleColumn
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
+  const [searchResults, setSearchResults] = useState([]);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const [searchLoading, setSearchLoading] = useState(false);
+  
+  // Debounced keyword search
+  const [debouncedKeyword, setDebouncedKeyword] = useState('');
+  
+  // Set up debounce effect
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedKeyword(formData.keywords);
+    }, 500); // 500ms delay
+    
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [formData.keywords]);
+  
+  // Effect to handle keyword search
+  useEffect(() => {
+    const searchByKeywords = async () => {
+      if (debouncedKeyword.trim() !== '') {
+        try {
+          setSearchLoading(true);
+          const results = await lessonService.getLessonsByKeyword(debouncedKeyword);
+          setSearchResults(results);
+          setShowSearchResults(results.length > 0);
+        } catch (err) {
+          console.error('Error searching lessons by keyword:', err);
+          setSearchResults([]);
+          setShowSearchResults(false);
+        } finally {
+          setSearchLoading(false);
+        }
+      } else {
+        setSearchResults([]);
+        setShowSearchResults(false);
+      }
+    };
+    
+    searchByKeywords();
+  }, [debouncedKeyword]);
+  
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
@@ -41,7 +83,7 @@ export default function LessonForm({ onSuccess, initialData = null, singleColumn
         year: parseInt(formData.year),
         quarter: formData.quarter,
         introduction: formData.introduction,
-        keywords: formData.keywords,
+        keywords: formData.keywords, // Keep as string for now, backend will handle parsing
         language: {
           languageId: formData.languageId.toString() // Ensure languageId is string
         },
@@ -188,7 +230,7 @@ export default function LessonForm({ onSuccess, initialData = null, singleColumn
             </select>
           </div>
           
-          <div>
+          <div className="relative">
             <label htmlFor="keywords" className="block text-sm font-medium text-gray-700 mb-1">
               Keywords
             </label>
@@ -200,6 +242,47 @@ export default function LessonForm({ onSuccess, initialData = null, singleColumn
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             />
+            
+            {/* Search results dropdown */}
+            {showSearchResults && (
+              <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md py-1 max-h-60 overflow-auto">
+                <div className="px-4 py-2 text-sm text-gray-700 bg-gray-50 border-b border-gray-200">
+                  {searchResults.length} lesson{searchResults.length !== 1 ? 's' : ''} found
+                </div>
+                {searchResults.map((lesson) => (
+                  <div 
+                    key={lesson.id} 
+                    className="px-4 py-2 text-sm text-gray-700 hover:bg-blue-100 cursor-pointer border-b border-gray-100 last:border-b-0"
+                    onClick={() => {
+                      // Copy lesson data to form
+                      setFormData({
+                        ...formData,
+                        title: lesson.title,
+                        introduction: lesson.introduction,
+                        year: lesson.year,
+                        quarter: lesson.quarter,
+                        keywords: lesson.keywords,
+                        languageId: lesson.language?.languageId || formData.languageId,
+                        dailySections: lesson.dailySections || []
+                      });
+                      setShowSearchResults(false);
+                    }}
+                  >
+                    <div className="font-medium">{lesson.title}</div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      {lesson.year} {lesson.quarter} • {lesson.language?.languageName || 'Unknown'}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {/* Loading indicator */}
+            {searchLoading && (
+              <div className="absolute right-3 top-9 flex items-center">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+              </div>
+            )}
           </div>
           
           <div>

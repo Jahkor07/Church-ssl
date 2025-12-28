@@ -242,6 +242,45 @@ export const lessonService = {
       throw error;
     }
   },
+  // Search lessons by keyword
+  async getLessonsByKeyword(keyword) {
+    try {
+      // Connect to external API
+      const params = new URLSearchParams({
+        keyword: keyword
+      });
+      const response = await fetch(`${API_BASE_URL}/lessons/by-keyword?${params.toString()}`);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('API Error:', response.status, response.statusText, errorText);
+        throw new Error(`Failed to search lessons: ${response.status} ${response.statusText}. Details: ${errorText}`);
+      }
+      
+      const data = await response.json();
+      
+      // Transform the data to match the expected format in the frontend
+      const transformedData = Array.isArray(data) ? data.map(lesson => ({
+        id: lesson.lessonId,
+        lessonId: lesson.lessonId,
+        title: lesson.title,
+        year: lesson.year,
+        quarter: lesson.quarter,
+        introduction: lesson.introduction,
+        keywords: lesson.keywords,
+        language: lesson.language,
+        dailySections: lesson.dailySections,
+        description: lesson.introduction?.substring(0, 100) + '...', // Create a description from introduction
+        sections: lesson.dailySections || [], // Map daily sections to sections for compatibility
+        isPublished: true, // Default to true for display purposes
+      })) : [];
+      
+      return transformedData;
+    } catch (error) {
+      console.error(`Error searching lessons with keyword ${keyword}:`, error);
+      throw error;
+    }
+  },
 };
 
 export default lessonService;
