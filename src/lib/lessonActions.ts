@@ -3,7 +3,13 @@
 // Fetch lessons by quarter
 export async function fetchLessonsByQuarter(year: number, quarter: string) {
   try {
-    const response = await fetch(`https://church-ssl-backend.onrender.com/api/lessons/lesson?year=${year}&quarter=${quarter}`);
+    // Properly encode the parameters
+    const params = new URLSearchParams({
+      year: year.toString(),
+      quarter: quarter
+    });
+    
+    const response = await fetch(`https://church-ssl-backend.onrender.com/api/lessons/lesson?${params.toString()}`);
     
     // Check if response is JSON
     const contentType = response.headers.get('content-type');

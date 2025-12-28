@@ -48,8 +48,19 @@ export default function LessonsByQuarterPage() {
       setLoading(true);
       setError(null);
       
-      // Convert year to number and fetch lessons using the service function
-      const lessonsData = await lessonService.getLessonsByQuarter(parseInt(year), quarter);
+      // Ensure year is properly formatted and quarter is in correct format
+      const yearNum = parseInt(year, 10);
+      if (isNaN(yearNum)) {
+        throw new Error('Invalid year provided');
+      }
+      
+      // Validate quarter format
+      const validQuarters = ['Q1', 'Q2', 'Q3', 'Q4'];
+      if (!validQuarters.includes(quarter)) {
+        throw new Error('Invalid quarter provided');
+      }
+      
+      const lessonsData = await lessonService.getLessonsByQuarter(yearNum, quarter);
       setLessons(lessonsData);
       
       // Check if we received an empty array
@@ -58,7 +69,16 @@ export default function LessonsByQuarterPage() {
       }
     } catch (err) {
       console.error('Error fetching lessons:', err);
-      setError('Failed to load lessons. Please check your network connection and try again.');
+      // Provide more specific error message based on error type
+      if (err instanceof Error && err.message.includes('400')) {
+        setError('Invalid parameters provided. Please check the year and quarter values.');
+      } else if (err instanceof Error && err.message.includes('404')) {
+        setError('No lessons found for the selected criteria.');
+      } else if (err instanceof Error && (err.message.includes('NETWORK_ERROR') || err.message.includes('fetch'))){
+        setError('Unable to connect to the lesson API. Please check your internet connection and try again.');
+      } else {
+        setError('Failed to load lessons. Please check your network connection and try again.');
+      }
     } finally {
       setLoading(false);
     }

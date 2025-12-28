@@ -8,7 +8,12 @@ export const lessonService = {
   async getLessonsByQuarter(year, quarter) {
     try {
       // Connect to external API
-      const response = await fetch(`${API_BASE_URL}/lessons/lesson?year=${year}&quarter=${quarter}`);
+      // Properly encode the parameters
+      const params = new URLSearchParams({
+        year: year.toString(),
+        quarter: quarter
+      });
+      const response = await fetch(`${API_BASE_URL}/lessons/lesson?${params.toString()}`);
       
       if (!response.ok) {
         const errorText = await response.text();
@@ -77,7 +82,9 @@ export const lessonService = {
       const response = await fetch(url);
       
       if (!response.ok) {
-        throw new Error(`Failed to fetch lessons: ${response.status} ${response.statusText}`);
+        const errorText = await response.text();
+        console.error('API Error:', response.status, response.statusText, errorText);
+        throw new Error(`Failed to fetch lessons: ${response.status} ${response.statusText}. Details: ${errorText}`);
       }
       
       const lessons = await response.json();
@@ -191,10 +198,15 @@ export const lessonService = {
   async searchLessons(query) {
     try {
       // Connect to external API
-      const response = await fetch(`${API_BASE_URL}/lessons/lesson/search?q=${encodeURIComponent(query)}`);
+      const params = new URLSearchParams({
+        q: query
+      });
+      const response = await fetch(`${API_BASE_URL}/lessons/lesson/search?${params.toString()}`);
       
       if (!response.ok) {
-        throw new Error(`Failed to search lessons: ${response.status} ${response.statusText}`);
+        const errorText = await response.text();
+        console.error('API Error:', response.status, response.statusText, errorText);
+        throw new Error(`Failed to search lessons: ${response.status} ${response.statusText}. Details: ${errorText}`);
       }
       
       const results = await response.json();
