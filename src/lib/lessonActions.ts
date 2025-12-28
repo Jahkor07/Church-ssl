@@ -58,21 +58,31 @@ export async function fetchLessonsByQuarter(year: number, quarter: string) {
 // Delete a single lesson
 export async function deleteLesson(id: string): Promise<boolean> {
   try {
-    const response = await fetch(`/api/lessons/${id}`, {
+    const response = await fetch(`https://church-ssl-backend.onrender.com/api/lessons/lesson/${id}`, {
       method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      }
     })
 
     if (!response.ok) {
-      const error = await response.json()
-      console.error(error.error || 'Failed to delete lesson')
-      return false
+      const errorText = await response.text();
+      console.error('API Error:', response.status, response.statusText, errorText);
+      throw new Error(`Failed to delete lesson: ${response.status} ${response.statusText}. Details: ${errorText}`);
     }
-
-    console.log('Lesson deleted successfully')
-    return true
+    
+    // Some DELETE endpoints return no content (204 status)
+    if (response.status === 204) {
+      console.log('Lesson deleted successfully');
+      return true;
+    }
+    
+    const result = await response.json();
+    console.log('Lesson deleted successfully', result);
+    return true;
   } catch (error) {
-    console.error('Error deleting lesson:', error)
-    return false
+    console.error('Error deleting lesson:', error);
+    return false;
   }
 }
 
@@ -105,30 +115,55 @@ export async function deleteLessons(ids: string[]): Promise<boolean> {
 // Search lessons
 export async function searchLessons(query: string, page: number = 1, limit: number = 10) {
   try {
-    // If query is empty, we still want to get all lessons
-    const queryString = query ? `q=${encodeURIComponent(query)}&` : '';
-    const response = await fetch(`/api/lessons/search?${queryString}page=${page}&limit=${limit}`)
+    // Use external API for search
+    const params = new URLSearchParams();
+    if (query) params.append('q', query);
+    params.append('page', page.toString());
+    params.append('limit', limit.toString());
+    
+    const response = await fetch(`https://church-ssl-backend.onrender.com/api/lessons/lesson/search?${params.toString()}`);
     
     // Check if response is JSON
-    const contentType = response.headers.get('content-type')
+    const contentType = response.headers.get('content-type');
     if (!contentType || !contentType.includes('application/json')) {
-      throw new Error('Received non-JSON response from server')
+      throw new Error('Received non-JSON response from server');
     }
     
     if (!response.ok) {
-      const error = await response.json()
-      throw new Error(error.error || 'Failed to search lessons')
+      const errorText = await response.text();
+      console.error('API Error:', response.status, response.statusText, errorText);
+      throw new Error(`Failed to search lessons: ${response.status} ${response.statusText}. Details: ${errorText}`);
     }
     
-    return await response.json()
+    const data = await response.json();
+    
+    // Transform response to match expected format
+    return {
+      lessons: Array.isArray(data) ? data.map(lesson => ({
+        id: lesson.lessonId,
+        title: lesson.title,
+        year: lesson.year,
+        language: { name: lesson.language?.languageName || lesson.language?.name || 'Unknown' },
+        isPublished: lesson.isPublished || true,
+        createdAt: lesson.createdAt || new Date().toISOString(),
+        updatedAt: lesson.updatedAt || new Date().toISOString(),
+      })) : [],
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(data.length / limit),
+        totalCount: data.length,
+        hasNextPage: false, // Simplified for now
+        hasPrevPage: false // Simplified for now
+      }
+    };
   } catch (error: any) {
-    console.error('Error searching lessons:', error)
+    console.error('Error searching lessons:', error);
     
     // If it's a network error (likely database connection issue), return empty data
     if (error instanceof TypeError && error.message.includes('fetch')) {
       // Network error - likely database connection issue
       // Return safe fallback instead of throwing error
-      return { lessons: [], pagination: { currentPage: 1, totalPages: 0, totalCount: 0, hasNextPage: false, hasPrevPage: false } }
+      return { lessons: [], pagination: { currentPage: 1, totalPages: 0, totalCount: 0, hasNextPage: false, hasPrevPage: false } };
     }
     
     // If it's a database connection error from the server side
@@ -138,22 +173,22 @@ export async function searchLessons(query: string, page: number = 1, limit: numb
                           error.message.includes('ECONNREFUSED') ||
                           error.message.includes('Authentication failed'))) {
       // Return safe fallback instead of throwing error
-      return { lessons: [], pagination: { currentPage: 1, totalPages: 0, totalCount: 0, hasNextPage: false, hasPrevPage: false } }
+      return { lessons: [], pagination: { currentPage: 1, totalPages: 0, totalCount: 0, hasNextPage: false, hasPrevPage: false } };
     }
     
     // If it's a general database error, provide a more user-friendly message
     if (error.message && error.message.includes('Failed to search lessons')) {
       // Return safe fallback instead of throwing error
-      return { lessons: [], pagination: { currentPage: 1, totalPages: 0, totalCount: 0, hasNextPage: false, hasPrevPage: false } }
+      return { lessons: [], pagination: { currentPage: 1, totalPages: 0, totalCount: 0, hasNextPage: false, hasPrevPage: false } };
     }
     
     // If we get a 500 error from the server, it's likely a database issue
     if (error.message && error.message.includes('Internal Server Error')) {
       // Return safe fallback instead of throwing error
-      return { lessons: [], pagination: { currentPage: 1, totalPages: 0, totalCount: 0, hasNextPage: false, hasPrevPage: false } }
+      return { lessons: [], pagination: { currentPage: 1, totalPages: 0, totalCount: 0, hasNextPage: false, hasPrevPage: false } };
     }
     
     // For any other error, return safe fallback
-    return { lessons: [], pagination: { currentPage: 1, totalPages: 0, totalCount: 0, hasNextPage: false, hasPrevPage: false } }
+    return { lessons: [], pagination: { currentPage: 1, totalPages: 0, totalCount: 0, hasNextPage: false, hasPrevPage: false } };
   }
 }

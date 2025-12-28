@@ -5,34 +5,61 @@ import AdminLayout from '@/components/AdminLayout';
 import { lessonService } from '@/services/api/lessonService';
 
 // Memoized lesson card component for performance
-const LessonCard = memo(({ lesson }: { lesson: any }) => (
-  <div 
-    key={lesson.lessonId || lesson.id} 
-    className="border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm p-5 hover:shadow-md transition-all duration-200 bg-white dark:bg-gray-800"
-  >
-    <h3 className="font-semibold text-lg text-gray-900 dark:text-white mb-2">
-      {lesson.title}
-    </h3>
-    <p className="text-gray-600 dark:text-gray-300 text-sm mb-3">
-      {lesson.description || lesson.introduction?.substring(0, 100) + '...' || 'No description available'}
-    </p>
-    <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
-      <span>Language: {lesson.language?.languageName || lesson.language?.name || 'Unknown'}</span>
-      <span>
-        {lesson.isPublished ? (
-          <span className="text-green-600 dark:text-green-400">Published</span>
-        ) : (
-          <span className="text-yellow-600 dark:text-yellow-400">Draft</span>
-        )}
-      </span>
+const LessonCard = memo(({ lesson, onDelete }: { lesson: any, onDelete: (id: string | number) => void }) => {
+  const handleDelete = async () => {
+    if (window.confirm(`Are you sure you want to delete the lesson "${lesson.title}"?`)) {
+      try {
+        await lessonService.deleteLesson(lesson.id);
+        onDelete(lesson.id);
+      } catch (error) {
+        console.error('Error deleting lesson:', error);
+        alert('Failed to delete lesson. Please try again.');
+      }
+    }
+  };
+  
+  return (
+    <div 
+      key={lesson.lessonId || lesson.id} 
+      className="border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm p-5 hover:shadow-md transition-all duration-200 bg-white dark:bg-gray-800 relative"
+    >
+      <div className="absolute top-2 right-2">
+        <button 
+          onClick={handleDelete}
+          className="text-red-500 hover:text-red-700 transition-colors duration-200"
+          title="Delete lesson"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+          </svg>
+        </button>
+      </div>
+      <h3 className="font-semibold text-lg text-gray-900 dark:text-white mb-2">
+        {lesson.title}
+      </h3>
+      <p className="text-gray-600 dark:text-gray-300 text-sm mb-3">
+        {lesson.description || lesson.introduction?.substring(0, 100) + '...' || 'No description available'}
+      </p>
+      <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+        <span>Language: {lesson.language?.languageName || lesson.language?.name || 'Unknown'}</span>
+        <span>
+          {lesson.isPublished ? (
+            <span className="text-green-600 dark:text-green-400">Published</span>
+          ) : (
+            <span className="text-yellow-600 dark:text-yellow-400">Draft</span>
+          )}
+        </span>
+      </div>
+      <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-200">
+          {lesson.dailySections?.length || lesson.sections?.length || 0} sections
+        </span>
+      </div>
     </div>
-    <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-200">
-        {lesson.dailySections?.length || lesson.sections?.length || 0} sections
-      </span>
-    </div>
-  </div>
-));
+  );
+});
+
+LessonCard.displayName = 'LessonCard';
 
 LessonCard.displayName = 'LessonCard';
 
@@ -166,7 +193,9 @@ export default function LessonsByQuarterPage() {
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                   {lessons.map((lesson) => (
-                    <LessonCard key={lesson.id} lesson={lesson} />
+                    <LessonCard key={lesson.id} lesson={lesson} onDelete={(id) => {
+                      setLessons(prevLessons => prevLessons.filter(l => l.id !== id));
+                    }} />
                   ))}
                 </div>
               </div>

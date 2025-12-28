@@ -102,11 +102,30 @@ export const lessonService = {
       const response = await fetch(`${API_BASE_URL}/lessons/lesson/${id}`);
       
       if (!response.ok) {
-        throw new Error(`Failed to fetch lesson: ${response.status} ${response.statusText}`);
+        const errorText = await response.text();
+        console.error('API Error:', response.status, response.statusText, errorText);
+        throw new Error(`Failed to fetch lesson: ${response.status} ${response.statusText}. Details: ${errorText}`);
       }
       
       const lesson = await response.json();
-      return lesson;
+      
+      // Transform the data to match the expected format in the frontend
+      const transformedLesson = {
+        id: lesson.lessonId,
+        lessonId: lesson.lessonId,
+        title: lesson.title,
+        year: lesson.year,
+        quarter: lesson.quarter,
+        introduction: lesson.introduction,
+        keywords: lesson.keywords,
+        language: lesson.language,
+        dailySections: lesson.dailySections,
+        description: lesson.introduction?.substring(0, 100) + '...', // Create a description from introduction
+        sections: lesson.dailySections || [], // Map daily sections to sections for compatibility
+        isPublished: lesson.isPublished || true, // Default to true for display purposes
+      };
+      
+      return transformedLesson;
     } catch (error) {
       console.error(`Error fetching lesson with ID ${id}:`, error);
       throw error;
@@ -183,7 +202,14 @@ export const lessonService = {
       });
       
       if (!response.ok) {
-        throw new Error(`Failed to delete lesson: ${response.status} ${response.statusText}`);
+        const errorText = await response.text();
+        console.error('API Error:', response.status, response.statusText, errorText);
+        throw new Error(`Failed to delete lesson: ${response.status} ${response.statusText}. Details: ${errorText}`);
+      }
+      
+      // Some DELETE endpoints return no content (204 status)
+      if (response.status === 204) {
+        return { success: true, message: 'Lesson deleted successfully' };
       }
       
       const result = await response.json();
